@@ -1,11 +1,922 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Arial-BoldMT;}
-{\colortbl;\red255\green255\blue255;\red255\green255\blue255;\red20\green21\blue21;}
-{\*\expandedcolortbl;;\cssrgb\c100000\c100000\c100000;\cssrgb\c10196\c10588\c10980;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\deftab720
-\pard\pardeftab720\partightenfactor0
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOSTAL PLAZA LEBU</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: #f8f9fa; 
+            color: #333;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 10px; }
+        .header { 
+            background: linear-gradient(135deg, #2c3e50, #3498db); 
+            color: white; 
+            text-align: center; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        
+        .nav-tabs { 
+            display: flex; 
+            background: white; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+        }
+        .nav-tab { 
+            flex: 1; 
+            padding: 18px 12px; 
+            background: #ecf0f1; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600; 
+            transition: all 0.3s ease;
+            color: #34495e;
+        }
+        .nav-tab:hover { background: #d5dbdb; }
+        .nav-tab.active { background: #3498db; color: white; }
+        
+        .page { 
+            display: none; 
+            background: white; 
+            border-radius: 15px; 
+            padding: 25px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+            margin-bottom: 20px;
+        }
+        .page.active { display: block; }
+        .page h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.8em; }
+        
+        /* CALENDARIO MEJORADO PARA IPHONE */
+        .calendar { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 8px; 
+            margin: 20px 0; 
+            font-size: 14px;
+        }
+        .calendar-header { 
+            background: #34495e; 
+            color: white; 
+            padding: 12px 8px; 
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 13px; 
+            border-radius: 8px;
+        }
+        .calendar-day { 
+            background: #f8f9fa; 
+            border: 2px solid #e9ecef;
+            padding: 10px 6px; 
+            text-align: center; 
+            min-height: 80px; 
+            border-radius: 8px; 
+            font-size: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .calendar-day:hover { border-color: #3498db; }
+        .calendar-day.today { 
+            background: #f39c12; 
+            color: white; 
+            font-weight: bold; 
+            border-color: #e67e22;
+        }
+        .calendar-day .day-number { 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        /* RESERVAS EN CALENDARIO - MEJORADAS PARA IPHONE */
+        .reserva-calendar { 
+            background: #e74c3c;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 4px;
+            margin: 2px 0;
+            border-radius: 4px;
+            word-wrap: break-word;
+            line-height: 1.2;
+            text-align: left;
+        }
+        .reserva-calendar.hab-1 { background: #e74c3c; }
+        .reserva-calendar.hab-2 { background: #3498db; }
+        .reserva-calendar.hab-3 { background: #27ae60; }
+        .reserva-calendar.hab-4 { background: #f39c12; }
+        .reserva-calendar.hab-5 { background: #9b59b6; }
+        
+        .habitacion { margin: 15px 0; padding: 20px; border-radius: 12px; color: white; font-weight: bold; }
+        .habitacion h3 { margin-bottom: 10px; font-size: 1.3em; }
+        .hab-1 { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .hab-2 { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .hab-3 { background: linear-gradient(135deg, #27ae60, #229954); }
+        .hab-4 { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .hab-5 { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        
+        .btn { 
+            padding: 12px 20px; 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600;
+            margin: 5px; 
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background: #2980b9; transform: translateY(-2px); }
+        .btn-success { background: #27ae60; }
+        .btn-success:hover { background: #229954; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-warning { background: #f39c12; }
+        .btn-warning:hover { background: #e67e22; }
+        
+        .form-group { margin: 15px 0; }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #2c3e50; 
+            font-size: 14px;
+        }
+        .form-control { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid #e9ecef; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            transition: border-color 0.3s ease;
+            background: #fff;
+        }
+        .form-control:focus { 
+            outline: none; 
+            border-color: #3498db; 
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .reserva { 
+            background: #f8f9fa; 
+            border: 2px solid #e9ecef;
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 12px; 
+            transition: all 0.3s ease;
+        }
+        .reserva:hover { border-color: #3498db; }
+        .reserva-header { 
+            margin-bottom: 15px; 
+            padding: 12px; 
+            border-radius: 8px; 
+            color: white; 
+            font-weight: bold;
+        }
+        
+        .stats-card { 
+            background: linear-gradient(135deg, #2c3e50, #34495e); 
+            color: white; 
+            padding: 25px; 
+            margin: 15px 0; 
+            border-radius: 15px; 
+            text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .stats-card h3 { margin-bottom: 15px; opacity: 0.9; }
+        .stats-card h2 { font-size: 2.5em; margin: 0; }
+        
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 1000; 
+        }
+        .modal-content { 
+            background: white; 
+            margin: 20px; 
+            padding: 25px; 
+            border-radius: 15px; 
+            max-height: 85vh; 
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .close { 
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px; 
+            cursor: pointer; 
+            color: #e74c3c; 
+            font-weight: bold;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+        .close:hover { background: #f8f9fa; }
+        
+        .alert { 
+            padding: 15px 20px; 
+            margin: 15px 0; 
+            border-radius: 8px; 
+            font-weight: 600;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        /* RESPONSIVE MEJORADO PARA IPHONE */
+        @media (max-width: 768px) {
+            .container { padding: 8px; }
+            .header { padding: 15px; }
+            .header h1 { font-size: 2em; }
+            .nav-tab { font-size: 12px; padding: 15px 8px; }
+            .calendar { gap: 4px; font-size: 12px; }
+            .calendar-day { min-height: 70px; padding: 6px 3px; }
+            .calendar-day .day-number { font-size: 14px; }
+            .reserva-calendar { font-size: 10px; padding: 2px 3px; }
+            .modal-content { margin: 10px; padding: 20px; max-height: 90vh; }
+            .form-control { font-size: 16px; padding: 14px; }
+            .btn { padding: 14px 18px; font-size: 16px; }
+            .stats-card h2 { font-size: 2em; }
+        }
+        
+        /* NOTIFICACIONES */
+        .notification { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            background: #27ae60; 
+            color: white; 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            z-index: 2000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏨 HOSTAL PLAZA LEBU</h1>
+            <p>Sistema de Gestión de Reservas</p>
+        </div>
 
-\f0\b\fs32 \cf2 \cb3 \expnd0\expndtw0\kerning0
-\outl0\strokewidth0 \strokec2 https://gensparkpublicblob.blob.core.windows.net/user-upload-image/page/toolu_01NKhHSJjdmF31HzM483H1ec/hostal_plaza_lebu_errores_corregidos.html\
-}
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showPage('calendario')">📅 Calendario</button>
+            <button class="nav-tab" onclick="showPage('lista')">📋 Lista</button>
+            <button class="nav-tab" onclick="showPage('disponibilidad')">🏠 Disponibilidad</button>
+            <button class="nav-tab" onclick="showPage('estadisticas')">📊 Estadísticas</button>
+        </div>
+
+        <!-- PÁGINA 1: CALENDARIO -->
+        <div id="calendario" class="page active">
+            <h2>📅 Calendario de Reservas</h2>
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-success" onclick="openModal('nuevaReserva')">+ Nueva Reserva</button>
+                <button class="btn btn-warning" onclick="cambiarMes(-1)">← Mes Anterior</button>
+                <button class="btn btn-warning" onclick="cambiarMes(1)">Mes Siguiente →</button>
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3 id="mesActual"></h3>
+            </div>
+            <div class="calendar" id="calendar"></div>
+        </div>
+
+        <!-- PÁGINA 2: LISTA -->
+        <div id="lista" class="page">
+            <h2>📋 Lista de Reservas</h2>
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="🔍 Buscar por nombre, habitación o fecha..." id="buscarReserva" onkeyup="filtrarReservas()">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-success" onclick="exportarExcel()">📤 Exportar Excel</button>
+                <button class="btn" onclick="openModal('nuevaReserva')">+ Nueva Reserva</button>
+            </div>
+            <div id="listaReservas"></div>
+        </div>
+
+        <!-- PÁGINA 3: DISPONIBILIDAD -->
+        <div id="disponibilidad" class="page">
+            <h2>🏠 Disponibilidad de Habitaciones</h2>
+            <div id="habitacionesStatus"></div>
+        </div>
+
+        <!-- PÁGINA 4: ESTADÍSTICAS -->
+        <div id="estadisticas" class="page">
+            <h2>📊 Estadísticas y Respaldos</h2>
+            
+            <div class="stats-card">
+                <h3>💰 Ingresos del Mes</h3>
+                <h2 id="ingresosMes">$0</h2>
+            </div>
+            
+            <div class="stats-card">
+                <h3>🏨 Ocupación Promedio</h3>
+                <h2 id="ocupacionPromedio">0%</h2>
+            </div>
+            
+            <div class="stats-card">
+                <h3>📅 Total Reservas</h3>
+                <h2 id="totalReservas">0</h2>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h3>💾 Sistema de Respaldos</h3>
+                <div class="alert alert-info">
+                    <strong>📄 Último respaldo:</strong> <span id="ultimoRespaldo">Nunca</span>
+                </div>
+                <button class="btn btn-success" onclick="crearRespaldo()">💾 Crear Respaldo</button>
+                <button class="btn" onclick="document.getElementById('importFile').click()">📥 Importar Datos</button>
+                <input type="file" id="importFile" style="display: none" accept=".json" onchange="importarDatos(this)">
+            </div>
+        </div>
+
+        <!-- MODAL NUEVA RESERVA -->
+        <div id="nuevaReserva" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('nuevaReserva')">&times;</span>
+                <h2>📝 Nueva Reserva</h2>
+                <form id="formReserva">
+                    <div class="form-group">
+                        <label>👤 Nombre del Huésped:</label>
+                        <input type="text" class="form-control" id="nombreHuesped" required placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Fecha Entrada:</label>
+                        <input type="date" class="form-control" id="fechaEntrada" required>
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Fecha Salida:</label>
+                        <input type="date" class="form-control" id="fechaSalida" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🏠 Habitación:</label>
+                        <select class="form-control" id="habitacion" required>
+                            <option value="">Seleccionar habitación</option>
+                            <option value="1">🔴 Habitación 1 (Roja)</option>
+                            <option value="2">🔵 Habitación 2 (Azul)</option>
+                            <option value="3">🟢 Habitación 3 (Verde)</option>
+                            <option value="4">🟠 Habitación 4 (Naranja)</option>
+                            <option value="5">🟣 Habitación 5 (Morada)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>👥 Número de Personas:</label>
+                        <select class="form-control" id="numPersonas" required>
+                            <option value="1">1 persona</option>
+                            <option value="2">2 personas</option>
+                            <option value="3">3 personas</option>
+                            <option value="4">4 personas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>💰 Precio por Noche (CLP):</label>
+                        <input type="number" class="form-control" id="precio" placeholder="45000" required min="1000">
+                    </div>
+                    <div class="form-group">
+                        <label>📝 Notas:</label>
+                        <textarea class="form-control" id="notas" rows="3" placeholder="Información adicional..."></textarea>
+                    </div>
+                    <div style="margin-top: 25px;">
+                        <button type="submit" class="btn btn-success">💾 Guardar Reserva</button>
+                        <button type="button" class="btn" onclick="closeModal('nuevaReserva')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- NOTIFICACIÓN -->
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN Y DATOS
+        let reservas = JSON.parse(localStorage.getItem('hostalReservas')) || [];
+        let mesActualVista = new Date();
+        
+        const habitacionesConfig = {
+            1: { nombre: 'Habitación 1', color: '#e74c3c', emoji: '🔴' },
+            2: { nombre: 'Habitación 2', color: '#3498db', emoji: '🔵' },
+            3: { nombre: 'Habitación 3', color: '#27ae60', emoji: '🟢' },
+            4: { nombre: 'Habitación 4', color: '#f39c12', emoji: '🟠' },
+            5: { nombre: 'Habitación 5', color: '#9b59b6', emoji: '🟣' }
+        };
+
+        const meses = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+
+        // NAVEGACIÓN
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            event.target.classList.add('active');
+            
+            switch(pageId) {
+                case 'calendario':
+                    generarCalendario();
+                    break;
+                case 'lista':
+                    mostrarListaReservas();
+                    break;
+                case 'disponibilidad':
+                    mostrarDisponibilidad();
+                    break;
+                case 'estadisticas':
+                    mostrarEstadisticas();
+                    break;
+            }
+        }
+
+        // MODALES
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // NOTIFICACIONES
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = mensaje;
+            notification.style.background = tipo === 'success' ? '#27ae60' : '#e74c3c';
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // CALENDARIO
+        function cambiarMes(direccion) {
+            mesActualVista.setMonth(mesActualVista.getMonth() + direccion);
+            generarCalendario();
+        }
+
+        function generarCalendario() {
+            const calendar = document.getElementById('calendar');
+            const mesActualElement = document.getElementById('mesActual');
+            
+            calendar.innerHTML = '';
+            mesActualElement.textContent = `${meses[mesActualVista.getMonth()]} ${mesActualVista.getFullYear()}`;
+            
+            // Headers de días
+            const dias = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+            dias.forEach(dia => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = dia;
+                calendar.appendChild(header);
+            });
+            
+            // Generar días del mes
+            const año = mesActualVista.getFullYear();
+            const mes = mesActualVista.getMonth();
+            const hoy = new Date();
+            
+            const primerDia = new Date(año, mes, 1);
+            let diaSemana = primerDia.getDay();
+            if (diaSemana === 0) diaSemana = 7;
+            diaSemana -= 1;
+            
+            // Días en blanco al inicio
+            for (let i = 0; i < diaSemana; i++) {
+                const dia = document.createElement('div');
+                dia.className = 'calendar-day';
+                calendar.appendChild(dia);
+            }
+            
+            // Días del mes
+            const diasEnMes = new Date(año, mes + 1, 0).getDate();
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                const diaElement = document.createElement('div');
+                diaElement.className = 'calendar-day';
+                
+                // Marcar día actual
+                if (dia === hoy.getDate() && 
+                    mes === hoy.getMonth() && 
+                    año === hoy.getFullYear()) {
+                    diaElement.classList.add('today');
+                }
+                
+                const dayNumber = document.createElement('span');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = dia;
+                diaElement.appendChild(dayNumber);
+                
+                // Buscar reservas para este día
+                const fechaStr = `${año}-${(mes+1).toString().padStart(2,'0')}-${dia.toString().padStart(2,'0')}`;
+                const reservasDelDia = reservas.filter(r => {
+                    const entrada = new Date(r.fechaEntrada);
+                    const salida = new Date(r.fechaSalida);
+                    const fecha = new Date(fechaStr);
+                    return fecha >= entrada && fecha < salida;
+                });
+                
+                reservasDelDia.forEach(reserva => {
+                    const reservaDiv = document.createElement('div');
+                    reservaDiv.className = `reserva-calendar hab-${reserva.habitacion}`;
+                    // FORMATO MEJORADO: Nombre corto + Emoji + Número
+                    const nombreCorto = reserva.nombreHuesped.split(' ')[0].substring(0, 8);
+                    const emoji = habitacionesConfig[reserva.habitacion].emoji;
+                    reservaDiv.textContent = `${nombreCorto} ${emoji}${reserva.habitacion}`;
+                    diaElement.appendChild(reservaDiv);
+                });
+                
+                calendar.appendChild(diaElement);
+            }
+        }
+
+        // LISTA DE RESERVAS
+        function mostrarListaReservas() {
+            const lista = document.getElementById('listaReservas');
+            lista.innerHTML = '';
+            
+            if (reservas.length === 0) {
+                lista.innerHTML = '<div class="alert alert-info">📋 No hay reservas registradas</div>';
+                return;
+            }
+            
+            // Ordenar por fecha de entrada
+            const reservasOrdenadas = [...reservas].sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
+            
+            reservasOrdenadas.forEach((reserva, index) => {
+                const hab = habitacionesConfig[reserva.habitacion];
+                const fechaEntrada = new Date(reserva.fechaEntrada);
+                const fechaSalida = new Date(reserva.fechaSalida);
+                const noches = Math.ceil((fechaSalida - fechaEntrada) / (1000 * 60 * 60 * 24));
+                const total = reserva.precio * noches;
+                
+                const reservaDiv = document.createElement('div');
+                reservaDiv.className = 'reserva';
+                reservaDiv.innerHTML = `
+                    <div class="reserva-header" style="background: ${hab.color};">
+                        <h4>${hab.emoji} ${reserva.nombreHuesped} - ${hab.nombre}</h4>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <strong>📅 Entrada:</strong> ${formatearFecha(reserva.fechaEntrada)}<br>
+                            <strong>📅 Salida:</strong> ${formatearFecha(reserva.fechaSalida)}<br>
+                            <strong>🌙 Noches:</strong> ${noches}
+                        </div>
+                        <div>
+                            <strong>👥 Personas:</strong> ${reserva.numPersonas}<br>
+                            <strong>💰 Por noche:</strong> $${parseInt(reserva.precio).toLocaleString()}<br>
+                            <strong>💳 Total:</strong> $${total.toLocaleString()}
+                        </div>
+                    </div>
+                    ${reserva.notas ? `<div><strong>📝 Notas:</strong> ${reserva.notas}</div>` : ''}
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-danger" onclick="eliminarReserva(${reservas.indexOf(reserva)})">🗑️ Eliminar</button>
+                        <button class="btn" onclick="editarReserva(${reservas.indexOf(reserva)})">✏️ Editar</button>
+                    </div>
+                `;
+                lista.appendChild(reservaDiv);
+            });
+        }
+
+        function filtrarReservas() {
+            const filtro = document.getElementById('buscarReserva').value.toLowerCase();
+            const reservasDiv = document.querySelectorAll('.reserva');
+            
+            reservasDiv.forEach(div => {
+                const texto = div.textContent.toLowerCase();
+                div.style.display = texto.includes(filtro) ? 'block' : 'none';
+            });
+        }
+
+        // DISPONIBILIDAD
+        function mostrarDisponibilidad() {
+            const container = document.getElementById('habitacionesStatus');
+            container.innerHTML = '';
+            
+            const hoy = new Date().toISOString().split('T')[0];
+            const mañana = new Date();
+            mañana.setDate(mañana.getDate() + 1);
+            const mañanaStr = mañana.toISOString().split('T')[0];
+            
+            Object.keys(habitacionesConfig).forEach(numHab => {
+                const hab = habitacionesConfig[numHab];
+                
+                // Verificar ocupación hoy
+                const ocupadaHoy = reservas.some(r => {
+                    const entrada = new Date(r.fechaEntrada);
+                    const salida = new Date(r.fechaSalida);
+                    const fecha = new Date(hoy);
+                    return r.habitacion == numHab && fecha >= entrada && fecha < salida;
+                });
+                
+                // Verificar ocupación mañana
+                const ocupadaMañana = reservas.some(r => {
+                    const entrada = new Date(r.fechaEntrada);
+                    const salida = new Date(r.fechaSalida);
+                    const fecha = new Date(mañanaStr);
+                    return r.habitacion == numHab && fecha >= entrada && fecha < salida;
+                });
+                
+                // Próximas reservas
+                const proximasReservas = reservas.filter(r => {
+                    return r.habitacion == numHab && new Date(r.fechaEntrada) > new Date();
+                }).sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
+                
+                const habDiv = document.createElement('div');
+                habDiv.className = `habitacion hab-${numHab}`;
+                habDiv.innerHTML = `
+                    <h3>${hab.emoji} ${hab.nombre}</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                        <div>
+                            <strong>Hoy:</strong> ${ocupadaHoy ? '🔴 OCUPADA' : '🟢 DISPONIBLE'}<br>
+                            <strong>Mañana:</strong> ${ocupadaMañana ? '🔴 OCUPADA' : '🟢 DISPONIBLE'}
+                        </div>
+                        <div>
+                            <strong>Capacidad:</strong> 1-4 personas<br>
+                            <strong>Próximas:</strong> ${proximasReservas.length} reservas
+                        </div>
+                    </div>
+                    ${proximasReservas.length > 0 ? `
+                        <div style="margin-top: 15px; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                            <strong>Próxima reserva:</strong><br>
+                            ${proximasReservas[0].nombreHuesped} - ${formatearFecha(proximasReservas[0].fechaEntrada)}
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(habDiv);
+            });
+        }
+
+        // ESTADÍSTICAS
+        function mostrarEstadisticas() {
+            const mesActual = new Date();
+            const inicioMes = new Date(mesActual.getFullYear(), mesActual.getMonth(), 1);
+            const finMes = new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 0);
+            
+            const reservasMes = reservas.filter(r => {
+                const fechaReserva = new Date(r.fechaEntrada);
+                return fechaReserva >= inicioMes && fechaReserva <= finMes;
+            });
+            
+            const ingresos = reservasMes.reduce((total, r) => {
+                const noches = Math.ceil((new Date(r.fechaSalida) - new Date(r.fechaEntrada)) / (1000 * 60 * 60 * 24));
+                return total + (r.precio * noches);
+            }, 0);
+            
+            const diasMes = finMes.getDate();
+            const diasOcupados = reservasMes.reduce((total, r) => {
+                return total + Math.ceil((new Date(r.fechaSalida) - new Date(r.fechaEntrada)) / (1000 * 60 * 60 * 24));
+            }, 0);
+            
+            const ocupacion = diasMes > 0 ? Math.round((diasOcupados / (diasMes * 5)) * 100) : 0;
+            
+            document.getElementById('ingresosMes').textContent = `$${ingresos.toLocaleString()}`;
+            document.getElementById('ocupacionPromedio').textContent = `${ocupacion}%`;
+            document.getElementById('totalReservas').textContent = reservas.length;
+            
+            // Último respaldo
+            const ultimoRespaldo = localStorage.getItem('ultimoRespaldo');
+            document.getElementById('ultimoRespaldo').textContent = 
+                ultimoRespaldo ? formatearFecha(ultimoRespaldo.split('T')[0]) : 'Nunca';
+        }
+
+        // RESERVAS - CRUD
+        document.getElementById('formReserva').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const reserva = {
+                id: Date.now(),
+                nombreHuesped: document.getElementById('nombreHuesped').value,
+                fechaEntrada: document.getElementById('fechaEntrada').value,
+                fechaSalida: document.getElementById('fechaSalida').value,
+                habitacion: parseInt(document.getElementById('habitacion').value),
+                numPersonas: parseInt(document.getElementById('numPersonas').value),
+                precio: parseInt(document.getElementById('precio').value),
+                notas: document.getElementById('notas').value,
+                fechaCreacion: new Date().toISOString()
+            };
+            
+            // Validar fechas
+            if (new Date(reserva.fechaEntrada) >= new Date(reserva.fechaSalida)) {
+                mostrarNotificacion('❌ La fecha de salida debe ser posterior a la entrada', 'error');
+                return;
+            }
+            
+            // Validar disponibilidad
+            const conflicto = reservas.some(r => {
+                if (r.habitacion !== reserva.habitacion) return false;
+                const entradaExistente = new Date(r.fechaEntrada);
+                const salidaExistente = new Date(r.fechaSalida);
+                const nuevaEntrada = new Date(reserva.fechaEntrada);
+                const nuevaSalida = new Date(reserva.fechaSalida);
+                
+                return (nuevaEntrada < salidaExistente && nuevaSalida > entradaExistente);
+            });
+            
+            if (conflicto) {
+                mostrarNotificacion('❌ La habitación no está disponible en esas fechas', 'error');
+                return;
+            }
+            
+            reservas.push(reserva);
+            guardarDatos();
+            
+            closeModal('nuevaReserva');
+            this.reset();
+            generarCalendario();
+            mostrarNotificacion('✅ Reserva guardada exitosamente');
+        });
+
+        function eliminarReserva(index) {
+            if (confirm('¿Eliminar esta reserva?')) {
+                reservas.splice(index, 1);
+                guardarDatos();
+                mostrarListaReservas();
+                generarCalendario();
+                mostrarNotificacion('✅ Reserva eliminada');
+            }
+        }
+
+        function editarReserva(index) {
+            const reserva = reservas[index];
+            document.getElementById('nombreHuesped').value = reserva.nombreHuesped;
+            document.getElementById('fechaEntrada').value = reserva.fechaEntrada;
+            document.getElementById('fechaSalida').value = reserva.fechaSalida;
+            document.getElementById('habitacion').value = reserva.habitacion;
+            document.getElementById('numPersonas').value = reserva.numPersonas;
+            document.getElementById('precio').value = reserva.precio;
+            document.getElementById('notas').value = reserva.notas || '';
+            
+            // Eliminar la reserva actual para editarla
+            reservas.splice(index, 1);
+            guardarDatos();
+            
+            openModal('nuevaReserva');
+        }
+
+        // IMPORTACIÓN Y EXPORTACIÓN
+        function exportarExcel() {
+            if (reservas.length === 0) {
+                mostrarNotificacion('❌ No hay reservas para exportar', 'error');
+                return;
+            }
+            
+            const csv = 'Huesped,Habitacion,Entrada,Salida,Noches,Personas,Precio por Noche,Total,Notas\n' +
+                reservas.map(r => {
+                    const hab = habitacionesConfig[r.habitacion];
+                    const noches = Math.ceil((new Date(r.fechaSalida) - new Date(r.fechaEntrada)) / (1000 * 60 * 60 * 24));
+                    const total = r.precio * noches;
+                    return `"${r.nombreHuesped}","${hab.nombre}","${formatearFecha(r.fechaEntrada)}","${formatearFecha(r.fechaSalida)}",${noches},${r.numPersonas},$${r.precio},$${total},"${r.notas || ''}"`;
+                }).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hostal_plaza_lebu_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            mostrarNotificacion('✅ Archivo Excel exportado exitosamente');
+        }
+
+        function crearRespaldo() {
+            const respaldo = {
+                fecha: new Date().toISOString(),
+                version: '1.0',
+                reservas: reservas,
+                configuracion: habitacionesConfig
+            };
+            
+            const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hostal_respaldo_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            localStorage.setItem('ultimoRespaldo', new Date().toISOString());
+            mostrarNotificacion('✅ Respaldo creado exitosamente');
+            mostrarEstadisticas();
+        }
+
+        function importarDatos(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const datos = JSON.parse(e.target.result);
+                    
+                    if (datos.reservas && Array.isArray(datos.reservas)) {
+                        if (confirm(`¿Importar ${datos.reservas.length} reservas? Esto reemplazará los datos actuales.`)) {
+                            reservas = datos.reservas;
+                            guardarDatos();
+                            generarCalendario();
+                            mostrarNotificacion('✅ Datos importados exitosamente');
+                        }
+                    } else {
+                        mostrarNotificacion('❌ Formato de archivo incorrecto', 'error');
+                    }
+                } catch (err) {
+                    mostrarNotificacion('❌ Error al leer el archivo', 'error');
+                    console.error('Error:', err);
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        // UTILIDADES
+        function guardarDatos() {
+            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
+        }
+
+        function formatearFecha(fecha) {
+            return new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar fechas mínimas
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaEntrada').min = hoy;
+            document.getElementById('fechaSalida').min = hoy;
+            
+            // Cargar datos iniciales
+            generarCalendario();
+            
+            // Respaldo automático cada 24 horas
+            setInterval(() => {
+                const ultimoRespaldo = localStorage.getItem('ultimoRespaldo');
+                const ahora = new Date();
+                const hace24h = new Date(ahora.getTime() - (24 * 60 * 60 * 1000));
+                
+                if (!ultimoRespaldo || new Date(ultimoRespaldo) < hace24h) {
+                    if (reservas.length > 0) {
+                        crearRespaldo();
+                        mostrarNotificacion('🔄 Respaldo automático creado');
+                    }
+                }
+            }, 60 * 60 * 1000); // Verificar cada hora
+        });
+
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            const modales = document.querySelectorAll('.modal');
+            modales.forEach(modal => {
+                if (event.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        }
+
+        // Prevenir zoom en iOS
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
