@@ -351,11 +351,11 @@
         <!-- Navigation mejorada -->
         <div class="dashboard-card mb-6 p-0 overflow-hidden">
             <div class="flex flex-wrap">
-                <button onclick="showPage('dashboard')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-blue-500 text-white transition-all duration-300 hover:bg-blue-600">
-                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
-                </button>
-                <button onclick="showPage('calendario')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button onclick="showPage('calendario')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-blue-500 text-white transition-all duration-300 hover:bg-blue-600">
                     <i class="fas fa-calendar mr-2"></i>Calendario
+                </button>
+                <button onclick="showPage('dashboard')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                 </button>
                 <button onclick="showPage('lista')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-list mr-2"></i>Lista
@@ -369,8 +369,47 @@
             </div>
         </div>
 
+        <!-- Página Calendario -->
+        <div id="calendario" class="page active">
+            <div class="dashboard-card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-calendar-alt mr-2"></i>Calendario de Reservas</h2>
+                    <div class="flex space-x-3">
+                        <button onclick="verHoy()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                            <i class="fas fa-today mr-2"></i>Hoy
+                        </button>
+                        <button onclick="openModal('nuevaReserva')" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-plus mr-2"></i>Nueva Reserva
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-6 flex justify-between items-center">
+                    <button onclick="cambiarMes(-1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h3 id="mesActual" class="text-2xl font-bold" style="color: var(--text-primary);"></h3>
+                    <button onclick="cambiarMes(1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="calendar-grid mb-4">
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">LUN</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">MAR</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">MIÉ</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">JUE</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">VIE</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">SÁB</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">DOM</div>
+                </div>
+                
+                <div id="calendarioDias" class="calendar-grid"></div>
+            </div>
+        </div>
+
         <!-- Página Dashboard -->
-        <div id="dashboard" class="page active">
+        <div id="dashboard" class="page hidden">
             <!-- Resumen de Actividad Hoy -->
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-600 text-white">
@@ -445,9 +484,6 @@
                 <div id="proximas-reservas" class="space-y-3"></div>
             </div>
         </div>
-
-        <!-- Página Calendario -->
-        <div id="calendario" class="page hidden">
             <div class="dashboard-card">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-calendar-alt mr-2"></i>Calendario de Reservas</h2>
@@ -834,7 +870,7 @@
         let respaldoAutomaticoActivo = localStorage.getItem('respaldoAutomatico') === 'true';
         let historialChecks = JSON.parse(localStorage.getItem('historialChecks')) || [];
         let respaldosHistorial = JSON.parse(localStorage.getItem('respaldosHistorial')) || [];
-        let paginaActiva = 'dashboard';
+        let paginaActiva = 'calendario';
         let filtroActual = 'todas';
         let tema = localStorage.getItem('tema') || 'light';
         
@@ -946,11 +982,11 @@
             
             // Cargar contenido específico
             switch(pageId) {
-                case 'dashboard':
-                    cargarDashboard();
-                    break;
                 case 'calendario':
                     generarCalendario();
+                    break;
+                case 'dashboard':
+                    cargarDashboard();
                     break;
                 case 'lista':
                     mostrarListaReservas();
@@ -960,7 +996,7 @@
                     break;
                 case 'estadisticas':
                     mostrarEstadisticas();
-                    setTimeout(generarGraficos, 100); // Delay para asegurar que el DOM esté listo
+                    setTimeout(generarGraficos, 500); // Delay más largo para asegurar que Chart.js esté listo
                     break;
             }
         }
@@ -973,6 +1009,9 @@
             cargarCheckoutsHoy();
             cargarProximasReservas();
         }
+        
+        // Alias para mantener compatibilidad
+        const actualizarDashboard = cargarDashboard;
 
         function actualizarHeaderStats() {
             const hoy = new Date().toISOString().split('T')[0];
@@ -2079,33 +2118,130 @@
         }
 
         function generarGraficos() {
-            // Gráfico de ingresos mensuales
-            const ctxIngresos = document.getElementById('chartIngresos');
-            if (ctxIngresos) {
-                const mesesData = [];
-                const ingresosData = [];
-                
-                // Últimos 6 meses
-                for (let i = 5; i >= 0; i--) {
-                    const fecha = new Date();
-                    fecha.setMonth(fecha.getMonth() - i);
+            try {
+                // Gráfico de ingresos mensuales
+                const ctxIngresos = document.getElementById('chartIngresos');
+                if (ctxIngresos && typeof Chart !== 'undefined') {
+                    // Destruir gráfico anterior si existe
+                    if (ctxIngresos.chart) {
+                        ctxIngresos.chart.destroy();
+                    }
                     
-                    const reservasMes = reservas.filter(r => {
-                        const fechaReserva = new Date(r.fechaEntrada);
-                        return fechaReserva.getMonth() === fecha.getMonth() && 
-                               fechaReserva.getFullYear() === fecha.getFullYear();
+                    const mesesData = [];
+                    const ingresosData = [];
+                    
+                    // Últimos 6 meses
+                    for (let i = 5; i >= 0; i--) {
+                        const fecha = new Date();
+                        fecha.setMonth(fecha.getMonth() - i);
+                        
+                        const reservasMes = reservas.filter(r => {
+                            const fechaReserva = new Date(r.fechaEntrada);
+                            return fechaReserva.getMonth() === fecha.getMonth() && 
+                                   fechaReserva.getFullYear() === fecha.getFullYear();
+                        });
+                        
+                        const ingresosMes = reservasMes.reduce((total, r) => {
+                            const noches = calcularNoches(r.fechaEntrada, r.fechaSalida);
+                            return total + (noches * (parseInt(r.precio || 0)));
+                        }, 0);
+                        
+                        mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }));
+                        ingresosData.push(ingresosMes);
+                    }
+                    
+                    ctxIngresos.chart = new Chart(ctxIngresos.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: mesesData,
+                            datasets: [{
+                                label: 'Ingresos ($)',
+                                data: ingresosData,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#3b82f6',
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + value.toLocaleString();
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     });
-                    
-                    const ingresosMes = reservasMes.reduce((total, r) => {
-                        const noches = calcularNoches(r.fechaEntrada, r.fechaSalida);
-                        return total + (noches * (parseInt(r.precio || 0)));
-                    }, 0);
-                    
-                    mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }));
-                    ingresosData.push(ingresosMes);
                 }
                 
-                new Chart(ctxIngresos, {
+                // Gráfico de ocupación por habitación
+                const ctxOcupacion = document.getElementById('chartOcupacion');
+                if (ctxOcupacion && typeof Chart !== 'undefined') {
+                    // Destruir gráfico anterior si existe
+                    if (ctxOcupacion.chart) {
+                        ctxOcupacion.chart.destroy();
+                    }
+                    
+                    const habitacionesData = [];
+                    const coloresHabitaciones = [];
+                    const ocupacionData = [];
+                    
+                    Object.keys(habitacionesConfig).forEach(numHab => {
+                        const hab = habitacionesConfig[numHab];
+                        const reservasHab = reservas.filter(r => r.habitacion == numHab);
+                        
+                        habitacionesData.push(hab.nombre);
+                        coloresHabitaciones.push(hab.color);
+                        ocupacionData.push(reservasHab.length);
+                    });
+                    
+                    ctxOcupacion.chart = new Chart(ctxOcupacion.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: habitacionesData,
+                            datasets: [{
+                                data: ocupacionData,
+                                backgroundColor: coloresHabitaciones,
+                                borderWidth: 3,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        usePointStyle: true
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.warn('Error al generar gráficos:', error);
+                showToast('⚠️ Error al cargar gráficos - Chart.js no disponible', 'warning', 3000);
+            }
+        }
                     type: 'line',
                     data: {
                         labels: mesesData,
@@ -2817,8 +2953,9 @@
             if (fechaEntrada) fechaEntrada.min = hoy;
             if (fechaSalida) fechaSalida.min = mañanaStr;
 
-            // Cargar página inicial
-            cargarDashboard();
+            // Cargar página inicial (calendario)
+            generarCalendario();
+            actualizarHeaderStats();
 
             // Configurar respaldo automático si está activo
             if (respaldoAutomaticoActivo) {
