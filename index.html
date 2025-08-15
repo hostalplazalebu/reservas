@@ -38,16 +38,28 @@
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            gap: 6px;
             width: 100%;
         }
         
+        @media (max-width: 768px) {
+            .calendar-grid {
+                gap: 4px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-grid {
+                gap: 3px;
+            }
+        }
+        
         .calendar-day {
-            min-height: 150px;
-            height: 150px;
+            min-height: 180px;
+            height: auto;
             border: 3px solid var(--border-color);
             border-radius: 15px;
-            padding: 10px 8px;
+            padding: 8px 6px;
             background: var(--bg-primary);
             font-size: 18px;
             font-weight: 500;
@@ -77,11 +89,11 @@
             font-size: 9px;
             font-weight: 500;
             color: white;
-            padding: 2px 2px;
+            padding: 3px 3px;
             margin: 1px 0;
             border-radius: 4px;
             text-align: left;
-            line-height: 1.0;
+            line-height: 1.1;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
@@ -89,7 +101,7 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
             box-shadow: 0 1px 4px rgba(0,0,0,0.2);
             border: 1px solid rgba(255,255,255,0.1);
-            min-height: 18px;
+            min-height: 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -229,12 +241,12 @@
 
         @media (max-width: 768px) {
             .calendar-day {
-                min-height: 120px;
-                height: 120px;
+                min-height: 160px;
+                height: auto;
                 font-size: 16px;
                 font-weight: 500;
-                padding: 8px 6px;
-                border-width: 3px;
+                padding: 6px 4px;
+                border-width: 2px;
             }
             .reserva-item {
                 font-size: 8px;
@@ -249,11 +261,11 @@
 
         @media (max-width: 640px) {
             .calendar-day {
-                min-height: 110px;
-                height: 110px;
+                min-height: 140px;
+                height: auto;
                 font-size: 15px;
                 font-weight: 500;
-                padding: 6px 4px;
+                padding: 5px 3px;
                 border-width: 2px;
             }
             .reserva-item {
@@ -269,11 +281,11 @@
 
         @media (max-width: 480px) {
             .calendar-day {
-                min-height: 100px;
-                height: 100px;
+                min-height: 120px;
+                height: auto;
                 font-size: 14px;
                 font-weight: 500;
-                padding: 5px 3px;
+                padding: 4px 2px;
                 border-width: 2px;
             }
             .reserva-item {
@@ -763,7 +775,7 @@
                     }
                     
                     reservaDiv.innerHTML = `
-                        <div style="font-size: 8px; font-weight: 500; line-height: 1.0; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); padding: 1px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${nombreMostrar} (H${reserva.habitacion})</div>
+                        <div style="font-size: 9px; font-weight: 500; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); padding: 2px 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${nombreMostrar} (H${reserva.habitacion})</div>
                     `;
                     
                     diaElement.appendChild(reservaDiv);
