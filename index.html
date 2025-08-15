@@ -38,30 +38,30 @@
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
+            gap: 4px;
             width: 100%;
         }
         
         @media (max-width: 768px) {
             .calendar-grid {
-                gap: 4px;
+                gap: 2px;
             }
         }
         
         @media (max-width: 640px) {
             .calendar-grid {
-                gap: 3px;
+                gap: 1px;
             }
         }
         
         .calendar-day {
-            min-height: 220px;
+            min-height: 120px;
             height: auto;
             border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 6px 4px;
+            border-radius: 8px;
+            padding: 4px 3px;
             background: var(--bg-primary);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 500;
             transition: all 0.3s ease;
             cursor: pointer;
@@ -86,22 +86,22 @@
         }
         
         .reserva-item {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 500;
             color: white;
-            padding: 3px 3px;
-            margin: 1px 0;
-            border-radius: 4px;
+            padding: 1px 2px;
+            margin: 0.5px 0;
+            border-radius: 3px;
             text-align: left;
-            line-height: 1.1;
+            line-height: 1.0;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
             overflow: visible;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.1);
-            min-height: 20px;
+            min-height: 14px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -241,62 +241,68 @@
 
         @media (max-width: 768px) {
             .calendar-day {
-                min-height: 200px;
+                min-height: 100px;
                 height: auto;
-                font-size: 16px;
+                max-height: 140px;
+                font-size: 14px;
                 font-weight: 500;
-                padding: 5px 3px;
-                border-width: 2px;
+                padding: 3px 2px;
+                border-width: 1px;
+                overflow-y: auto;
             }
             .reserva-item {
-                font-size: 9px;
+                font-size: 7px;
                 font-weight: 500;
-                padding: 2px 2px;
-                margin: 1px 0;
-                min-height: 18px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+                padding: 1px 1px;
+                margin: 0px 0;
+                min-height: 12px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
                 border-width: 1px;
             }
         }
 
         @media (max-width: 640px) {
             .calendar-day {
-                min-height: 180px;
+                min-height: 85px;
                 height: auto;
-                font-size: 15px;
-                font-weight: 500;
-                padding: 4px 2px;
-                border-width: 2px;
-            }
-            .reserva-item {
-                font-size: 8px;
+                max-height: 120px;
+                font-size: 13px;
                 font-weight: 500;
                 padding: 2px 2px;
-                margin: 1px 0;
-                min-height: 16px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+                border-width: 1px;
+                overflow-y: auto;
+            }
+            .reserva-item {
+                font-size: 6px;
+                font-weight: 600;
+                padding: 1px 1px;
+                margin: 0px 0;
+                min-height: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
                 border-width: 1px;
             }
         }
 
         @media (max-width: 480px) {
             .calendar-day {
-                min-height: 160px;
+                min-height: 75px;
                 height: auto;
-                font-size: 14px;
+                max-height: 100px;
+                font-size: 12px;
                 font-weight: 500;
-                padding: 3px 2px;
-                border-width: 2px;
+                padding: 2px 1px;
+                border-width: 1px;
+                overflow-y: auto;
             }
             .reserva-item {
-                font-size: 7px;
-                font-weight: 500;
-                padding: 1px 2px;
-                margin: 1px 0;
-                min-height: 14px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+                font-size: 5px;
+                font-weight: 600;
+                padding: 0.5px 1px;
+                margin: 0px 0;
+                min-height: 8px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
                 border-width: 1px;
-                line-height: 0.9;
+                line-height: 0.8;
             }
         }
     </style>
@@ -778,7 +784,7 @@
                     }
                     
                     reservaDiv.innerHTML = `
-                        <div style="font-size: 9px; font-weight: 500; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); padding: 2px 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${nombreMostrar} (H${reserva.habitacion})</div>
+                        <div style="font-size: 7px; font-weight: 600; line-height: 1.0; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); padding: 1px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${nombreMostrar} (H${reserva.habitacion})</div>
                     `;
                     
                     diaElement.appendChild(reservaDiv);
