@@ -2118,13 +2118,19 @@
         }
 
         function generarGraficos() {
+            // Verificar si Chart.js está disponible
+            if (typeof Chart === 'undefined') {
+                console.log('Chart.js no está disponible');
+                return;
+            }
+
             try {
                 // Gráfico de ingresos mensuales
                 const ctxIngresos = document.getElementById('chartIngresos');
-                if (ctxIngresos && typeof Chart !== 'undefined') {
+                if (ctxIngresos) {
                     // Destruir gráfico anterior si existe
-                    if (ctxIngresos.chart) {
-                        ctxIngresos.chart.destroy();
+                    if (window.chartIngresos) {
+                        window.chartIngresos.destroy();
                     }
                     
                     const mesesData = [];
@@ -2150,7 +2156,7 @@
                         ingresosData.push(ingresosMes);
                     }
                     
-                    ctxIngresos.chart = new Chart(ctxIngresos.getContext('2d'), {
+                    window.chartIngresos = new Chart(ctxIngresos.getContext('2d'), {
                         type: 'line',
                         data: {
                             labels: mesesData,
@@ -2192,10 +2198,10 @@
                 
                 // Gráfico de ocupación por habitación
                 const ctxOcupacion = document.getElementById('chartOcupacion');
-                if (ctxOcupacion && typeof Chart !== 'undefined') {
+                if (ctxOcupacion) {
                     // Destruir gráfico anterior si existe
-                    if (ctxOcupacion.chart) {
-                        ctxOcupacion.chart.destroy();
+                    if (window.chartOcupacion) {
+                        window.chartOcupacion.destroy();
                     }
                     
                     const habitacionesData = [];
@@ -2211,7 +2217,7 @@
                         ocupacionData.push(reservasHab.length);
                     });
                     
-                    ctxOcupacion.chart = new Chart(ctxOcupacion.getContext('2d'), {
+                    window.chartOcupacion = new Chart(ctxOcupacion.getContext('2d'), {
                         type: 'doughnut',
                         data: {
                             labels: habitacionesData,
@@ -2962,10 +2968,48 @@
                 configurarRespaldoAutomatico();
             }
 
+            // Agregar datos de ejemplo si no hay reservas (solo para demostración)
+            if (reservas.length === 0) {
+                const hoy = new Date();
+                const mañana = new Date(hoy);
+                mañana.setDate(mañana.getDate() + 1);
+                const pasadoMañana = new Date(hoy);
+                pasadoMañana.setDate(pasadoMañana.getDate() + 2);
+                
+                const ejemploReservas = [
+                    {
+                        id: 'demo_1',
+                        nombreHuesped: 'Juan Pérez',
+                        fechaEntrada: hoy.toISOString().split('T')[0],
+                        fechaSalida: pasadoMañana.toISOString().split('T')[0],
+                        habitacion: 1,
+                        numPersonas: 2,
+                        precio: 45000,
+                        notas: 'Cliente frecuente',
+                        fechaCreacion: new Date().toISOString()
+                    },
+                    {
+                        id: 'demo_2',
+                        nombreHuesped: 'María González',
+                        fechaEntrada: mañana.toISOString().split('T')[0],
+                        fechaSalida: pasadoMañana.toISOString().split('T')[0],
+                        habitacion: 3,
+                        numPersonas: 1,
+                        precio: 48000,
+                        notas: 'Habitación con vista',
+                        fechaCreacion: new Date().toISOString()
+                    }
+                ];
+                
+                reservas = ejemploReservas;
+                guardarDatos();
+                showToast('📝 Datos de ejemplo agregados para demostración', 'info', 3000);
+            }
+
             // Mostrar mensaje de bienvenida
             setTimeout(() => {
                 showToast('🏨 Bienvenido al Sistema de Gestión del Hostal Plaza Lebu', 'info', 4000);
-            }, 1000);
+            }, 1500);
         }
 
         // Inicializar cuando el DOM esté listo
