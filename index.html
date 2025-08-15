@@ -87,8 +87,10 @@
         }
         
         .reserva-item:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
             z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
         }
         
         .hab-1 { background: linear-gradient(135deg, #ef4444, #dc2626); }
@@ -238,29 +240,11 @@
     <div class="container mx-auto p-4 max-w-7xl">
         <!-- Header -->
         <div class="dashboard-card mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
-            <div class="flex items-center justify-center mb-4">
+            <div class="flex items-center justify-center">
                 <i class="fas fa-hotel text-4xl mr-3"></i>
                 <div>
                     <h1 class="text-4xl font-bold mb-1">HOSTAL PLAZA LEBU</h1>
                     <p class="text-xl opacity-90">Sistema de Gestión de Reservas</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <div class="text-2xl font-bold" id="header-ocupadas">0</div>
-                    <div class="text-sm opacity-80">Ocupadas Hoy</div>
-                </div>
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <div class="text-2xl font-bold" id="header-disponibles">5</div>
-                    <div class="text-sm opacity-80">Disponibles</div>
-                </div>
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <div class="text-2xl font-bold" id="header-checkins">0</div>
-                    <div class="text-sm opacity-80">Check-ins Hoy</div>
-                </div>
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <div class="text-2xl font-bold" id="header-checkouts">0</div>
-                    <div class="text-sm opacity-80">Check-outs Hoy</div>
                 </div>
             </div>
         </div>
@@ -442,6 +426,97 @@
         </div>
     </div>
 
+    <!-- Modal Editar Reserva -->
+    <div id="editarReserva" class="modal">
+        <div class="modal-content w-full max-w-lg">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-edit mr-2"></i>Editar Reserva</h2>
+                <button onclick="closeModal('editarReserva')" class="text-gray-500 hover:text-red-500 text-2xl transition-colors duration-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="formEditarReserva" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Nombre del Huésped:</label>
+                    <input type="text" id="editNombreHuesped" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                           style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Fecha Entrada:</label>
+                        <input type="date" id="editFechaEntrada" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Fecha Salida:</label>
+                        <input type="date" id="editFechaSalida" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Habitación:</label>
+                    <select id="editHabitacion" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <option value="">Seleccionar habitación</option>
+                        <option value="1">🔴 Habitación 1 (Roja)</option>
+                        <option value="2">🔵 Habitación 2 (Azul)</option>
+                        <option value="3">🟢 Habitación 3 (Verde)</option>
+                        <option value="4">🟠 Habitación 4 (Naranja)</option>
+                        <option value="5">🟣 Habitación 5 (Morada)</option>
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Personas:</label>
+                        <select id="editNumPersonas" required 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="1">1 persona</option>
+                            <option value="2">2 personas</option>
+                            <option value="3">3 personas</option>
+                            <option value="4">4 personas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Precio por Noche:</label>
+                        <input type="number" id="editPrecio" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Notas:</label>
+                    <textarea id="editNotas" rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                              style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"></textarea>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-save mr-2"></i>Actualizar
+                    </button>
+                    <button type="button" onclick="eliminarReservaActual()" 
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300">
+                        <i class="fas fa-trash mr-2"></i>Eliminar
+                    </button>
+                    <button type="button" onclick="closeModal('editarReserva')" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Variables globales
         let reservas = JSON.parse(localStorage.getItem('hostalReservas')) || [];
@@ -607,6 +682,13 @@
                     const reservaDiv = document.createElement('div');
                     
                     reservaDiv.className = `reserva-item ${hab.clase}`;
+                    reservaDiv.title = `${reserva.nombreHuesped} - ${hab.nombre}\nEntrada: ${reserva.fechaEntrada}\nSalida: ${reserva.fechaSalida}`;
+                    
+                    // Hacer clickeable para editar
+                    reservaDiv.onclick = (e) => {
+                        e.stopPropagation();
+                        abrirEditarReserva(reserva);
+                    };
                     
                     const nombreCorto = reserva.nombreHuesped.split(' ')[0];
                     const iniciales = reserva.nombreHuesped.split(' ').map(n => n[0]).join('').substring(0, 2);
@@ -654,30 +736,80 @@
             closeModal('nuevaReserva');
             this.reset();
             generarCalendario();
-            actualizarHeaderStats();
             
             const hab = habitacionesConfig[reserva.habitacion];
             showToast(`✅ Reserva guardada: ${reserva.nombreHuesped} en ${hab.nombre}`, 'success');
         });
 
+        // Formulario de editar reserva
+        document.getElementById('formEditarReserva').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!reservaEditando) return;
+            
+            // Actualizar los datos de la reserva
+            reservaEditando.nombreHuesped = document.getElementById('editNombreHuesped').value;
+            reservaEditando.fechaEntrada = document.getElementById('editFechaEntrada').value;
+            reservaEditando.fechaSalida = document.getElementById('editFechaSalida').value;
+            reservaEditando.habitacion = parseInt(document.getElementById('editHabitacion').value);
+            reservaEditando.numPersonas = parseInt(document.getElementById('editNumPersonas').value);
+            reservaEditando.precio = parseInt(document.getElementById('editPrecio').value);
+            reservaEditando.notas = document.getElementById('editNotas').value;
+            reservaEditando.fechaModificacion = new Date().toISOString();
+            
+            // Guardar cambios
+            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
+            
+            closeModal('editarReserva');
+            generarCalendario();
+            
+            const hab = habitacionesConfig[reservaEditando.habitacion];
+            showToast(`✅ Reserva actualizada: ${reservaEditando.nombreHuesped} en ${hab.nombre}`, 'success');
+            
+            reservaEditando = null;
+        });
+
+        // Variables para edición
+        let reservaEditando = null;
+
+        // Funciones de edición de reservas
+        function abrirEditarReserva(reserva) {
+            reservaEditando = reserva;
+            
+            // Llenar el formulario con los datos actuales
+            document.getElementById('editNombreHuesped').value = reserva.nombreHuesped;
+            document.getElementById('editFechaEntrada').value = reserva.fechaEntrada;
+            document.getElementById('editFechaSalida').value = reserva.fechaSalida;
+            document.getElementById('editHabitacion').value = reserva.habitacion;
+            document.getElementById('editNumPersonas').value = reserva.numPersonas;
+            document.getElementById('editPrecio').value = reserva.precio;
+            document.getElementById('editNotas').value = reserva.notas || '';
+            
+            openModal('editarReserva');
+        }
+
+        function eliminarReservaActual() {
+            if (!reservaEditando) return;
+            
+            const hab = habitacionesConfig[reservaEditando.habitacion];
+            if (confirm(`¿Estás seguro de eliminar la reserva de ${reservaEditando.nombreHuesped} en ${hab.nombre}?`)) {
+                const index = reservas.findIndex(r => r.id === reservaEditando.id);
+                if (index !== -1) {
+                    reservas.splice(index, 1);
+                    localStorage.setItem('hostalReservas', JSON.stringify(reservas));
+                    
+                    closeModal('editarReserva');
+                    generarCalendario();
+                    
+                    showToast(`✅ Reserva de ${reservaEditando.nombreHuesped} eliminada`, 'success');
+                    reservaEditando = null;
+                }
+            }
+        }
+
         // Actualizar estadísticas del header
         function actualizarHeaderStats() {
-            const hoy = new Date().toISOString().split('T')[0];
-            
-            const ocupadasHoy = reservas.filter(r => {
-                const entrada = new Date(r.fechaEntrada);
-                const salida = new Date(r.fechaSalida);
-                const fecha = new Date(hoy);
-                return fecha >= entrada && fecha < salida;
-            }).length;
-            
-            const checkinsHoy = reservas.filter(r => r.fechaEntrada === hoy).length;
-            const checkoutsHoy = reservas.filter(r => r.fechaSalida === hoy).length;
-            
-            document.getElementById('header-ocupadas').textContent = ocupadasHoy;
-            document.getElementById('header-disponibles').textContent = 5 - ocupadasHoy;
-            document.getElementById('header-checkins').textContent = checkinsHoy;
-            document.getElementById('header-checkouts').textContent = checkoutsHoy;
+            // Función removida - sin resumen en header
         }
 
         // Cerrar modales al hacer clic fuera
@@ -734,7 +866,6 @@
             // Cargar página inicial
             setTimeout(() => {
                 generarCalendario();
-                actualizarHeaderStats();
             }, 100);
 
             // Mostrar mensaje de bienvenida
