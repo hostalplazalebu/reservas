@@ -74,22 +74,22 @@
         }
         
         .reserva-item {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 500;
             color: white;
-            padding: 4px 3px;
-            margin: 2px 0;
-            border-radius: 6px;
-            text-align: center;
-            line-height: 1.1;
+            padding: 2px 2px;
+            margin: 1px 0;
+            border-radius: 4px;
+            text-align: left;
+            line-height: 1.0;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
             overflow: visible;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.15);
-            min-height: 25px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            min-height: 18px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -237,12 +237,12 @@
                 border-width: 3px;
             }
             .reserva-item {
-                font-size: 10px;
+                font-size: 8px;
                 font-weight: 500;
-                padding: 3px 2px;
-                margin: 2px 0;
-                min-height: 24px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+                padding: 2px 2px;
+                margin: 1px 0;
+                min-height: 16px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
                 border-width: 1px;
             }
         }
@@ -257,12 +257,12 @@
                 border-width: 2px;
             }
             .reserva-item {
-                font-size: 9px;
+                font-size: 7px;
                 font-weight: 500;
-                padding: 2px 1px;
-                margin: 1px 0;
-                min-height: 22px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+                padding: 1px 2px;
+                margin: 0px 0;
+                min-height: 14px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
                 border-width: 1px;
             }
         }
@@ -277,14 +277,14 @@
                 border-width: 2px;
             }
             .reserva-item {
-                font-size: 8px;
+                font-size: 6px;
                 font-weight: 500;
-                padding: 2px 1px;
-                margin: 1px 0;
-                min-height: 20px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+                padding: 1px 1px;
+                margin: 0px 0;
+                min-height: 12px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
                 border-width: 1px;
-                line-height: 0.9;
+                line-height: 0.8;
             }
         }
     </style>
@@ -749,21 +749,21 @@
                         abrirEditarReserva(reserva);
                     };
                     
-                    // Mostrar nombre completo si es corto, sino usar nombre y apellido abreviado
+                    // Mostrar nombre de forma muy compacta como en la imagen de ejemplo
                     let nombreMostrar = reserva.nombreHuesped;
-                    if (nombreMostrar.length > 12) {
+                    if (nombreMostrar.length > 10) {
                         const partes = nombreMostrar.split(' ');
                         if (partes.length > 1) {
                             // Usar primer nombre + inicial del apellido
-                            nombreMostrar = partes[0] + ' ' + partes[partes.length - 1].substring(0, 1) + '.';
+                            nombreMostrar = partes[0].substring(0, 6) + ' ' + partes[partes.length - 1].substring(0, 1) + '.';
                         } else {
-                            // Si es un solo nombre muy largo, cortarlo
-                            nombreMostrar = nombreMostrar.substring(0, 9) + '...';
+                            // Si es un solo nombre muy largo, cortarlo más agresivamente
+                            nombreMostrar = nombreMostrar.substring(0, 7) + '...';
                         }
                     }
                     
                     reservaDiv.innerHTML = `
-                        <div style="font-size: 10px; font-weight: 500; line-height: 1.2; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); padding: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;">${nombreMostrar} (H${reserva.habitacion})</div>
+                        <div style="font-size: 8px; font-weight: 500; line-height: 1.0; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); padding: 1px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${nombreMostrar} (H${reserva.habitacion})</div>
                     `;
                     
                     diaElement.appendChild(reservaDiv);
