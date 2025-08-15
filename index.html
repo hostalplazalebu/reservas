@@ -420,18 +420,29 @@
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-list mr-2"></i>Lista de Reservas</h2>
                     <div class="flex space-x-3">
-                        <select id="filtroHabitacion" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                            <option value="">Todas las habitaciones</option>
-                            <option value="1">🔴 Habitación 1</option>
-                            <option value="2">🔵 Habitación 2</option>
-                            <option value="3">🟢 Habitación 3</option>
-                            <option value="4">🟠 Habitación 4</option>
-                            <option value="5">🟣 Habitación 5</option>
-                        </select>
+                        <button onclick="importarReservas()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                            <i class="fas fa-upload mr-2"></i>Importar
+                        </button>
                         <button onclick="exportarReservas()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
                             <i class="fas fa-download mr-2"></i>Exportar
                         </button>
                     </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <div class="flex-1 min-w-64">
+                        <input type="text" id="buscadorReservas" placeholder="🔍 Buscar por nombre del huésped..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                    <select id="filtroHabitacion" class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-48" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <option value="">🏠 Todas las habitaciones</option>
+                        <option value="1">🔴 Habitación 1</option>
+                        <option value="2">🔵 Habitación 2</option>
+                        <option value="3">🟢 Habitación 3</option>
+                        <option value="4">🟠 Habitación 4</option>
+                        <option value="5">🟣 Habitación 5</option>
+                    </select>
                 </div>
                 
                 <div id="listaReservas" class="space-y-3">
@@ -940,15 +951,25 @@
         function generarListaReservas() {
             const container = document.getElementById('listaReservas');
             const filtroHab = document.getElementById('filtroHabitacion');
+            const buscador = document.getElementById('buscadorReservas');
             
             if (!container) return;
             
             // Filtrar reservas
             const habitacionFiltro = filtroHab ? filtroHab.value : '';
+            const nombreFiltro = buscador ? buscador.value.toLowerCase().trim() : '';
             let reservasFiltradas = [...reservas];
             
+            // Filtro por habitación
             if (habitacionFiltro) {
-                reservasFiltradas = reservas.filter(r => r.habitacion.toString() === habitacionFiltro);
+                reservasFiltradas = reservasFiltradas.filter(r => r.habitacion.toString() === habitacionFiltro);
+            }
+            
+            // Filtro por nombre
+            if (nombreFiltro) {
+                reservasFiltradas = reservasFiltradas.filter(r => 
+                    r.nombreHuesped.toLowerCase().includes(nombreFiltro)
+                );
             }
             
             // Ordenar por fecha de entrada
@@ -1049,12 +1070,98 @@
             showToast('Reservas exportadas exitosamente', 'success');
         }
 
-        // Event listener para el filtro
+        function importarReservas() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const csv = e.target.result;
+                        const lines = csv.split('\n');
+                        const headers = lines[0].split(',');
+                        
+                        let importadas = 0;
+                        let errores = 0;
+                        
+                        for (let i = 1; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line) continue;
+                            
+                            try {
+                                // Parsear CSV simple (sin comillas complejas)
+                                const values = line.split(',').map(v => v.replace(/"/g, '').trim());
+                                
+                                if (values.length >= 6) {
+                                    const nuevaReserva = {
+                                        id: Date.now().toString() + '_' + i,
+                                        nombreHuesped: values[0],
+                                        fechaEntrada: values[2],
+                                        fechaSalida: values[3],
+                                        habitacion: parseInt(values[1].replace(/[^0-9]/g, '')) || 1,
+                                        numPersonas: parseInt(values[4]) || 1,
+                                        precio: parseInt(values[5]) || 45000,
+                                        notas: values[7] || '',
+                                        fechaCreacion: new Date().toISOString()
+                                    };
+                                    
+                                    // Validar datos básicos
+                                    if (nuevaReserva.nombreHuesped && nuevaReserva.fechaEntrada && nuevaReserva.fechaSalida) {
+                                        reservas.push(nuevaReserva);
+                                        importadas++;
+                                    }
+                                }
+                            } catch (error) {
+                                errores++;
+                                console.error('Error procesando línea:', line, error);
+                            }
+                        }
+                        
+                        if (importadas > 0) {
+                            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
+                            generarCalendario();
+                            generarListaReservas();
+                            showToast(`✅ ${importadas} reservas importadas exitosamente`, 'success');
+                        } else {
+                            showToast('No se pudieron importar reservas. Verifique el formato del archivo.', 'error');
+                        }
+                        
+                        if (errores > 0) {
+                            showToast(`⚠️ ${errores} líneas no se pudieron procesar`, 'warning');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error importando CSV:', error);
+                        showToast('Error al leer el archivo CSV', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Event listeners para filtros y buscador
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const filtroHab = document.getElementById('filtroHabitacion');
+                const buscador = document.getElementById('buscadorReservas');
+                
                 if (filtroHab) {
                     filtroHab.addEventListener('change', generarListaReservas);
+                }
+                
+                if (buscador) {
+                    buscador.addEventListener('input', function() {
+                        // Debounce para evitar demasiadas búsquedas
+                        clearTimeout(this.searchTimeout);
+                        this.searchTimeout = setTimeout(() => {
+                            generarListaReservas();
+                        }, 300);
+                    });
                 }
             }, 500);
         });
