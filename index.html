@@ -6,40 +6,131 @@
     <title>HOSTAL PLAZA LEBU</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Variables CSS para tema */
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --purple-color: #8b5cf6;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1f2937;
+            --bg-secondary: #111827;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #374151;
+        }
+
+        body {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
         }
         .calendar-day {
-            min-height: 80px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 4px;
-            background: white;
+            min-height: 90px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 6px;
+            background: var(--bg-primary);
             font-size: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
         }
         .calendar-day.today {
-            background: #fbbf24;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: white;
             font-weight: bold;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+        .calendar-day.has-checkin {
+            border-left: 4px solid #10b981;
+        }
+        .calendar-day.has-checkout {
+            border-right: 4px solid #ef4444;
         }
         .reserva-item {
             font-size: 11px;
             font-weight: bold;
             color: white;
-            padding: 3px 2px;
-            margin: 1px 0;
-            border-radius: 4px;
+            padding: 4px 3px;
+            margin: 2px 0;
+            border-radius: 6px;
             text-align: center;
             line-height: 1.2;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .hab-1 { background: #ef4444; }
-        .hab-2 { background: #3b82f6; }
-        .hab-3 { background: #10b981; }
-        .hab-4 { background: #f59e0b; }
-        .hab-5 { background: #8b5cf6; }
+        .reserva-item:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        .reserva-item.checkin::before {
+            content: "📥";
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            font-size: 8px;
+        }
+        .reserva-item.checkout::before {
+            content: "📤";
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            font-size: 8px;
+        }
+        .hab-1 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .hab-2 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .hab-3 { background: linear-gradient(135deg, #10b981, #059669); }
+        .hab-4 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .hab-5 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            min-width: 300px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            transform: translateX(400px);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        /* Modales mejorados */
         .modal {
             display: none;
             position: fixed;
@@ -47,94 +138,347 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
         .modal.active {
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.3s ease;
         }
         .modal-content {
-            background: white;
+            background: var(--bg-primary);
             max-width: 90%;
             max-height: 90%;
             overflow-y: auto;
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: 20px;
+            padding: 30px;
             margin: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            animation: slideIn 0.3s ease forwards;
         }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--purple-color));
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: scale(0.9) translateY(-20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Disponibilidad mejorada */
+        .room-status {
+            position: relative;
+            overflow: hidden;
+        }
+        .room-status::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+        .room-status:hover::before {
+            left: 100%;
+            opacity: 1;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-available {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .status-occupied {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .status-checkout {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(180deg);
+        }
+
+        /* Responsivo mejorado */
         @media (max-width: 768px) {
             .calendar-day {
-                min-height: 70px;
-                font-size: 10px;
+                min-height: 75px;
+                font-size: 11px;
+                padding: 4px;
             }
             .reserva-item {
                 font-size: 10px;
-                padding: 2px 1px;
+                padding: 3px 2px;
             }
             .modal-content {
                 max-width: 95%;
-                padding: 16px;
+                padding: 20px;
                 margin: 10px;
+                border-radius: 16px;
+            }
+            .dashboard-card {
+                padding: 16px;
+            }
+            .toast {
+                min-width: 280px;
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .calendar-day {
+                min-height: 65px;
+                font-size: 10px;
+            }
+            .reserva-item {
+                font-size: 9px;
+                padding: 2px 1px;
             }
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-4 max-w-6xl">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg mb-6 text-center">
-            <h1 class="text-3xl font-bold mb-2"><i class="fas fa-hotel mr-2"></i>HOSTAL PLAZA LEBU</h1>
-            <p class="text-lg">Sistema de Gestión de Reservas</p>
+<body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+        <i id="theme-icon" class="fas fa-moon text-lg"></i>
+    </button>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <div class="container mx-auto p-4 max-w-7xl">
+        <!-- Header mejorado -->
+        <div class="dashboard-card mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-hotel text-4xl mr-3"></i>
+                <div>
+                    <h1 class="text-4xl font-bold mb-1">HOSTAL PLAZA LEBU</h1>
+                    <p class="text-xl opacity-90">Sistema de Gestión de Reservas</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <div class="text-2xl font-bold" id="header-ocupadas">0</div>
+                    <div class="text-sm opacity-80">Ocupadas Hoy</div>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <div class="text-2xl font-bold" id="header-disponibles">5</div>
+                    <div class="text-sm opacity-80">Disponibles</div>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <div class="text-2xl font-bold" id="header-checkins">0</div>
+                    <div class="text-sm opacity-80">Check-ins Hoy</div>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <div class="text-2xl font-bold" id="header-checkouts">0</div>
+                    <div class="text-sm opacity-80">Check-outs Hoy</div>
+                </div>
+            </div>
         </div>
 
-        <!-- Navigation -->
-        <div class="bg-white rounded-lg shadow-lg mb-6 overflow-hidden">
-            <div class="flex">
-                <button onclick="showPage('calendario')" class="nav-tab flex-1 py-4 px-2 text-sm font-semibold bg-blue-500 text-white">
-                    <i class="fas fa-calendar mr-1"></i>Calendario
+        <!-- Navigation mejorada -->
+        <div class="dashboard-card mb-6 p-0 overflow-hidden">
+            <div class="flex flex-wrap">
+                <button onclick="showPage('dashboard')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-blue-500 text-white transition-all duration-300 hover:bg-blue-600">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                 </button>
-                <button onclick="showPage('lista')" class="nav-tab flex-1 py-4 px-2 text-sm font-semibold bg-gray-200 text-gray-700">
-                    <i class="fas fa-list mr-1"></i>Lista
+                <button onclick="showPage('calendario')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                    <i class="fas fa-calendar mr-2"></i>Calendario
                 </button>
-                <button onclick="showPage('disponibilidad')" class="nav-tab flex-1 py-4 px-2 text-sm font-semibold bg-gray-200 text-gray-700">
-                    <i class="fas fa-home mr-1"></i>Disponibilidad
+                <button onclick="showPage('lista')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                    <i class="fas fa-list mr-2"></i>Lista
                 </button>
-                <button onclick="showPage('estadisticas')" class="nav-tab flex-1 py-4 px-2 text-sm font-semibold bg-gray-200 text-gray-700">
-                    <i class="fas fa-chart-bar mr-1"></i>Estadísticas
+                <button onclick="showPage('disponibilidad')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                    <i class="fas fa-bed mr-2"></i>Disponibilidad
+                </button>
+                <button onclick="showPage('estadisticas')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                    <i class="fas fa-chart-line mr-2"></i>Estadísticas
                 </button>
             </div>
         </div>
 
-        <!-- Página Calendario -->
-        <div id="calendario" class="page active">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-calendar-alt mr-2"></i>Calendario de Reservas</h2>
-                    <button onclick="openModal('nuevaReserva')" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold">
+        <!-- Página Dashboard -->
+        <div id="dashboard" class="page active">
+            <!-- Resumen de Actividad Hoy -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-600 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Check-ins Hoy</h3>
+                            <p class="text-3xl font-bold" id="dash-checkins-hoy">0</p>
+                        </div>
+                        <i class="fas fa-sign-in-alt text-4xl opacity-70"></i>
+                    </div>
+                    <div class="text-sm opacity-80" id="dash-checkins-pendientes">0 pendientes</div>
+                </div>
+
+                <div class="dashboard-card bg-gradient-to-br from-red-500 to-red-600 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Check-outs Hoy</h3>
+                            <p class="text-3xl font-bold" id="dash-checkouts-hoy">0</p>
+                        </div>
+                        <i class="fas fa-sign-out-alt text-4xl opacity-70"></i>
+                    </div>
+                    <div class="text-sm opacity-80" id="dash-checkouts-pendientes">0 pendientes</div>
+                </div>
+
+                <div class="dashboard-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Ocupación</h3>
+                            <p class="text-3xl font-bold" id="dash-ocupacion">0%</p>
+                        </div>
+                        <i class="fas fa-percentage text-4xl opacity-70"></i>
+                    </div>
+                    <div class="text-sm opacity-80" id="dash-habitaciones-ocupadas">0 de 5 ocupadas</div>
+                </div>
+            </div>
+
+            <!-- Próximos 7 días -->
+            <div class="dashboard-card mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800" style="color: var(--text-primary);">
+                        <i class="fas fa-calendar-week mr-2"></i>Próximos 7 Días
+                    </h2>
+                    <button onclick="openModal('nuevaReserva')" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
                         <i class="fas fa-plus mr-2"></i>Nueva Reserva
                     </button>
                 </div>
+                <div id="proximos-dias" class="grid grid-cols-1 md:grid-cols-7 gap-4"></div>
+            </div>
+
+            <!-- Check-ins y Check-outs de Hoy -->
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="dashboard-card">
+                    <h3 class="text-xl font-semibold mb-4 text-green-600">
+                        <i class="fas fa-arrow-right mr-2"></i>Check-ins de Hoy
+                    </h3>
+                    <div id="checkins-hoy" class="space-y-3"></div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3 class="text-xl font-semibold mb-4 text-red-600">
+                        <i class="fas fa-arrow-left mr-2"></i>Check-outs de Hoy
+                    </h3>
+                    <div id="checkouts-hoy" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Reservas Próximas -->
+            <div class="dashboard-card">
+                <h3 class="text-xl font-semibold mb-4" style="color: var(--text-primary);">
+                    <i class="fas fa-clock mr-2"></i>Próximas Reservas
+                </h3>
+                <div id="proximas-reservas" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- Página Calendario -->
+        <div id="calendario" class="page hidden">
+            <div class="dashboard-card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-calendar-alt mr-2"></i>Calendario de Reservas</h2>
+                    <div class="flex space-x-3">
+                        <button onclick="verHoy()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                            <i class="fas fa-today mr-2"></i>Hoy
+                        </button>
+                        <button onclick="openModal('nuevaReserva')" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-plus mr-2"></i>Nueva Reserva
+                        </button>
+                    </div>
+                </div>
                 
-                <div class="mb-4 flex justify-between items-center">
-                    <button onclick="cambiarMes(-1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                <div class="mb-6 flex justify-between items-center">
+                    <button onclick="cambiarMes(-1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <h3 id="mesActual" class="text-xl font-semibold text-gray-800"></h3>
-                    <button onclick="cambiarMes(1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                    <h3 id="mesActual" class="text-2xl font-bold" style="color: var(--text-primary);"></h3>
+                    <button onclick="cambiarMes(1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
 
                 <div class="calendar-grid mb-4">
-                    <div class="text-center font-bold text-gray-600 py-2 bg-gray-100 rounded">LUN</div>
-                    <div class="text-center font-bold text-gray-600 py-2 bg-gray-100 rounded">MAR</div>
-                    <div class="text-center font-bold text-gray-600 py-2 bg-gray-100 rounded">MIÉ</div>
-                    <div class="text-center font-bold text-gray-600 py-2 bg-gray-100 rounded">JUE</div>
-                    <div class="text-center font-bold text-gray-600 py-2 bg-gray-100 rounded">VIE</div>
-                    <div class="text-center font-bold text-gray-600 py-2 bg-gray-100 rounded">SÁB</div>
-                    <div class="text-center font-bold text-gray-600 py-2 bg-gray-100 rounded">DOM</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">LUN</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">MAR</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">MIÉ</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">JUE</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">VIE</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">SÁB</div>
+                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">DOM</div>
                 </div>
                 
                 <div id="calendarioDias" class="calendar-grid"></div>
@@ -143,23 +487,51 @@
 
         <!-- Página Lista -->
         <div id="lista" class="page hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-list-ul mr-2"></i>Lista de Reservas</h2>
-                    <div class="space-x-2">
-                        <button onclick="exportarDatos()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+            <div class="dashboard-card">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-list-ul mr-2"></i>Lista de Reservas</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="filtrarPorEstado('todas')" class="filtro-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300" data-filtro="todas">
+                            Todas
+                        </button>
+                        <button onclick="filtrarPorEstado('activas')" class="filtro-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-300" data-filtro="activas">
+                            Activas
+                        </button>
+                        <button onclick="filtrarPorEstado('pasadas')" class="filtro-btn bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-all duration-300" data-filtro="pasadas">
+                            Pasadas
+                        </button>
+                        <button onclick="exportarDatos()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
                             <i class="fas fa-download mr-2"></i>Exportar
                         </button>
-                        <button onclick="importarDatos()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                        <button onclick="importarDatos()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
                             <i class="fas fa-upload mr-2"></i>Importar
                         </button>
                     </div>
                 </div>
                 
+                <div class="mb-6 flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="text" id="buscarReserva" placeholder="Buscar por nombre, habitación o fecha..." 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"
+                               oninput="filtrarReservas()">
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="filtroHabitacion" onchange="filtrarReservas()" class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="">Todas las habitaciones</option>
+                            <option value="1">Habitación 1</option>
+                            <option value="2">Habitación 2</option>
+                            <option value="3">Habitación 3</option>
+                            <option value="4">Habitación 4</option>
+                            <option value="5">Habitación 5</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="mb-4">
-                    <input type="text" id="buscarReserva" placeholder="Buscar por nombre, habitación o fecha..." 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           oninput="filtrarReservas()">
+                    <p class="text-sm" style="color: var(--text-secondary);">
+                        Total: <span id="total-reservas-mostradas" class="font-bold">0</span> reservas
+                    </p>
                 </div>
                 
                 <div id="listaReservas" class="space-y-4"></div>
@@ -168,94 +540,203 @@
 
         <!-- Página Disponibilidad -->
         <div id="disponibilidad" class="page hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-bed mr-2"></i>Disponibilidad de Habitaciones</h2>
-                <div id="habitacionesStatus" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div class="dashboard-card mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-bed mr-2"></i>Estado de Habitaciones</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="realizarCheckIn()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Check-in
+                        </button>
+                        <button onclick="realizarCheckOut()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Check-out
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Resumen rápido -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-green-100 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-green-600" id="disponibles-count">0</div>
+                        <div class="text-sm text-green-700">Disponibles</div>
+                    </div>
+                    <div class="bg-red-100 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-red-600" id="ocupadas-count">0</div>
+                        <div class="text-sm text-red-700">Ocupadas</div>
+                    </div>
+                    <div class="bg-yellow-100 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-yellow-600" id="limpieza-count">0</div>
+                        <div class="text-sm text-yellow-700">En Limpieza</div>
+                    </div>
+                    <div class="bg-blue-100 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="mantenimiento-count">0</div>
+                        <div class="text-sm text-blue-700">Mantenimiento</div>
+                    </div>
+                </div>
+                
+                <div id="habitacionesStatus" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- Historial de Check-ins y Check-outs -->
+            <div class="dashboard-card">
+                <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">
+                    <i class="fas fa-history mr-2"></i>Historial Reciente
+                </h3>
+                <div id="historial-checkins" class="space-y-3"></div>
             </div>
         </div>
 
         <!-- Página Estadísticas -->
         <div id="estadisticas" class="page hidden">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-chart-line mr-2"></i>Estadísticas y Respaldos</h2>
-                
-                <div class="grid md:grid-cols-3 gap-6 mb-6">
-                    <div class="bg-gradient-to-r from-green-400 to-green-600 text-white p-6 rounded-lg text-center">
-                        <i class="fas fa-dollar-sign text-3xl mb-2"></i>
-                        <h3 class="text-lg font-semibold">Ingresos del Mes</h3>
-                        <p id="ingresosMes" class="text-2xl font-bold">$0</p>
-                    </div>
-                    <div class="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-6 rounded-lg text-center">
-                        <i class="fas fa-percentage text-3xl mb-2"></i>
-                        <h3 class="text-lg font-semibold">Ocupación</h3>
-                        <p id="ocupacionPromedio" class="text-2xl font-bold">0%</p>
-                    </div>
-                    <div class="bg-gradient-to-r from-purple-400 to-purple-600 text-white p-6 rounded-lg text-center">
-                        <i class="fas fa-users text-3xl mb-2"></i>
-                        <h3 class="text-lg font-semibold">Total Reservas</h3>
-                        <p id="totalReservas" class="text-2xl font-bold">0</p>
+            <!-- Métricas principales -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-600 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Ingresos del Mes</h3>
+                            <p id="ingresosMes" class="text-3xl font-bold">$0</p>
+                        </div>
+                        <i class="fas fa-dollar-sign text-4xl opacity-70"></i>
                     </div>
                 </div>
-
-                <div class="bg-gray-50 p-6 rounded-lg mb-6">
-                    <h3 class="text-lg font-semibold mb-4"><i class="fas fa-save mr-2"></i>Sistema de Respaldos</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
+                <div class="dashboard-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                    <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-600 mb-2">Último respaldo: <span id="ultimoRespaldo">Nunca</span></p>
+                            <h3 class="text-lg font-semibold opacity-90">Ocupación</h3>
+                            <p id="ocupacionPromedio" class="text-3xl font-bold">0%</p>
+                        </div>
+                        <i class="fas fa-percentage text-4xl opacity-70"></i>
+                    </div>
+                </div>
+                <div class="dashboard-card bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Total Reservas</h3>
+                            <p id="totalReservas" class="text-3xl font-bold">0</p>
+                        </div>
+                        <i class="fas fa-users text-4xl opacity-70"></i>
+                    </div>
+                </div>
+                <div class="dashboard-card bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Promedio/Noche</h3>
+                            <p id="promedioNoche" class="text-3xl font-bold">$0</p>
+                        </div>
+                        <i class="fas fa-bed text-4xl opacity-70"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="dashboard-card">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">
+                        <i class="fas fa-chart-line mr-2"></i>Ingresos Mensuales
+                    </h3>
+                    <canvas id="chartIngresos" width="400" height="200"></canvas>
+                </div>
+                <div class="dashboard-card">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">
+                        <i class="fas fa-chart-pie mr-2"></i>Ocupación por Habitación
+                    </h3>
+                    <canvas id="chartOcupacion" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Análisis detallado -->
+            <div class="dashboard-card mb-6">
+                <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">
+                    <i class="fas fa-analytics mr-2"></i>Análisis Detallado
+                </h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-2" style="color: var(--text-primary);">Top Habitaciones</h4>
+                        <div id="topHabitaciones" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2" style="color: var(--text-primary);">Estadías Promedio</h4>
+                        <div id="estadiasPromedio" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2" style="color: var(--text-primary);">Tendencias</h4>
+                        <div id="tendencias" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sistema de respaldos mejorado -->
+            <div class="dashboard-card">
+                <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">
+                    <i class="fas fa-shield-alt mr-2"></i>Sistema de Respaldos
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-lg" style="background: var(--bg-secondary);">
+                            <p class="text-sm mb-2" style="color: var(--text-secondary);">Último respaldo: <span id="ultimoRespaldo" class="font-bold">Nunca</span></p>
+                            <p class="text-sm mb-4" style="color: var(--text-secondary);">Estado: <span id="estadoRespaldo" class="font-bold">Inactivo</span></p>
                             <div class="space-y-2">
-                                <button onclick="crearRespaldoManual()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                                    <i class="fas fa-save mr-2"></i>Respaldo Manual
+                                <button onclick="crearRespaldoManual()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-all duration-300 hover:scale-105">
+                                    <i class="fas fa-download mr-2"></i>Respaldo Manual
                                 </button>
-                                <button onclick="activarRespaldoAutomatico()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
-                                    <i class="fas fa-clock mr-2"></i>Activar Respaldo Automático
+                                <button onclick="activarRespaldoAutomatico()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-all duration-300 hover:scale-105">
+                                    <i class="fas fa-clock mr-2"></i>Toggle Respaldo Auto
                                 </button>
                             </div>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-600 mb-2">Estado del respaldo automático:</p>
-                            <p id="estadoRespaldo" class="text-lg font-semibold text-red-600">Inactivo</p>
-                            <input type="file" id="inputImportar" accept=".json" style="display: none;" onchange="procesarImportacion(event)">
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-lg" style="background: var(--bg-secondary);">
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">Historial de Respaldos</h4>
+                            <div id="historialRespaldos" class="space-y-2 max-h-40 overflow-y-auto">
+                                <p class="text-sm" style="color: var(--text-secondary);">No hay respaldos anteriores</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <input type="file" id="inputImportar" accept=".json" style="display: none;" onchange="procesarImportacion(event)">
             </div>
         </div>
     </div>
 
     <!-- Modal Nueva Reserva -->
     <div id="nuevaReserva" class="modal">
-        <div class="modal-content w-full max-w-md">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold"><i class="fas fa-plus-circle mr-2"></i>Nueva Reserva</h2>
-                <button onclick="closeModal('nuevaReserva')" class="text-gray-500 hover:text-gray-700 text-2xl">
+        <div class="modal-content w-full max-w-lg">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-plus-circle mr-2"></i>Nueva Reserva</h2>
+                <button onclick="closeModal('nuevaReserva')" class="text-gray-500 hover:text-red-500 text-2xl transition-colors duration-300">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <form id="formReserva" class="space-y-4">
+            <form id="formReserva" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Huésped:</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Nombre del Huésped:</label>
                     <input type="text" id="nombreHuesped" required 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                           style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Entrada:</label>
-                        <input type="date" id="fechaEntrada" required min="2024-08-05"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Fecha Entrada:</label>
+                        <input type="date" id="fechaEntrada" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Salida:</label>
-                        <input type="date" id="fechaSalida" required min="2024-08-06"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Fecha Salida:</label>
+                        <input type="date" id="fechaSalida" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                     </div>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Habitación:</label>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Habitación:</label>
                     <select id="habitacion" required 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"
+                            onchange="calcularPrecioTotal()">
                         <option value="">Seleccionar habitación</option>
                         <option value="1">🔴 Habitación 1 (Roja)</option>
                         <option value="2">🔵 Habitación 2 (Azul)</option>
@@ -263,42 +744,86 @@
                         <option value="4">🟠 Habitación 4 (Naranja)</option>
                         <option value="5">🟣 Habitación 5 (Morada)</option>
                     </select>
+                    <div id="disponibilidadHab" class="mt-2 text-sm"></div>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Personas:</label>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Personas:</label>
                         <select id="numPersonas" required 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                             <option value="1">1 persona</option>
-                            <option value="2">2 personas</option>
+                            <option value="2" selected>2 personas</option>
                             <option value="3">3 personas</option>
                             <option value="4">4 personas</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio por Noche:</label>
+                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Precio por Noche:</label>
                         <input type="number" id="precio" placeholder="45000" required 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"
+                               oninput="calcularPrecioTotal()">
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-lg" style="background: var(--bg-secondary);">
+                    <div class="flex justify-between items-center">
+                        <span style="color: var(--text-secondary);">Noches: <span id="totalNoches">0</span></span>
+                        <span class="text-xl font-bold" style="color: var(--text-primary);">Total: $<span id="precioTotal">0</span></span>
                     </div>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Notas:</label>
-                    <textarea id="notas" rows="3" 
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Notas:</label>
+                    <textarea id="notas" rows="3" placeholder="Comentarios adicionales, solicitudes especiales..."
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                              style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"></textarea>
                 </div>
                 
                 <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-semibold">
-                        <i class="fas fa-save mr-2"></i>Guardar
+                    <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-save mr-2"></i>Guardar Reserva
                     </button>
                     <button type="button" onclick="closeModal('nuevaReserva')" 
-                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md font-semibold">
-                        Cancelar
+                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-semibold transition-all duration-300">
+                        <i class="fas fa-times mr-2"></i>Cancelar
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Check-in/Check-out -->
+    <div id="modalCheckInOut" class="modal">
+        <div class="modal-content w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="tituloCheckInOut" class="text-2xl font-bold" style="color: var(--text-primary);">Check-in</h2>
+                <button onclick="closeModal('modalCheckInOut')" class="text-gray-500 hover:text-red-500 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="contenidoCheckInOut">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Reserva -->
+    <div id="modalVerReserva" class="modal">
+        <div class="modal-content w-full max-w-lg">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-eye mr-2"></i>Detalles de Reserva</h2>
+                <button onclick="closeModal('modalVerReserva')" class="text-gray-500 hover:text-red-500 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="contenidoVerReserva">
+                <!-- Contenido dinámico -->
+            </div>
         </div>
     </div>
 
@@ -307,36 +832,377 @@
         let reservas = JSON.parse(localStorage.getItem('hostalReservas')) || [];
         let fechaActual = new Date();
         let respaldoAutomaticoActivo = localStorage.getItem('respaldoAutomatico') === 'true';
+        let historialChecks = JSON.parse(localStorage.getItem('historialChecks')) || [];
+        let respaldosHistorial = JSON.parse(localStorage.getItem('respaldosHistorial')) || [];
+        let paginaActiva = 'dashboard';
+        let filtroActual = 'todas';
+        let tema = localStorage.getItem('tema') || 'light';
         
         const habitacionesConfig = {
-            1: { nombre: 'Habitación 1', color: '#ef4444', emoji: '🔴', clase: 'hab-1' },
-            2: { nombre: 'Habitación 2', color: '#3b82f6', emoji: '🔵', clase: 'hab-2' },
-            3: { nombre: 'Habitación 3', color: '#10b981', emoji: '🟢', clase: 'hab-3' },
-            4: { nombre: 'Habitación 4', color: '#f59e0b', emoji: '🟠', clase: 'hab-4' },
-            5: { nombre: 'Habitación 5', color: '#8b5cf6', emoji: '🟣', clase: 'hab-5' }
+            1: { nombre: 'Habitación 1', color: '#ef4444', emoji: '🔴', clase: 'hab-1', precio: 45000 },
+            2: { nombre: 'Habitación 2', color: '#3b82f6', emoji: '🔵', clase: 'hab-2', precio: 45000 },
+            3: { nombre: 'Habitación 3', color: '#10b981', emoji: '🟢', clase: 'hab-3', precio: 48000 },
+            4: { nombre: 'Habitación 4', color: '#f59e0b', emoji: '🟠', clase: 'hab-4', precio: 42000 },
+            5: { nombre: 'Habitación 5', color: '#8b5cf6', emoji: '🟣', clase: 'hab-5', precio: 50000 }
         };
+
+        // Funciones de utilidad
+        function showToast(message, type = 'success', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 opacity-70 hover:opacity-100">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, duration);
+        }
+
+        function formatearFecha(fecha, formato = 'completa') {
+            const opciones = {
+                completa: { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    weekday: 'long' 
+                },
+                corta: { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                },
+                solo_fecha: {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }
+            };
+            
+            return new Date(fecha).toLocaleDateString('es-ES', opciones[formato]);
+        }
+
+        function calcularNoches(entrada, salida) {
+            const fechaEntrada = new Date(entrada);
+            const fechaSalida = new Date(salida);
+            const diferencia = fechaSalida - fechaEntrada;
+            return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
+        }
+
+        function esHoy(fecha) {
+            const hoy = new Date();
+            const fechaComparar = new Date(fecha);
+            return hoy.toDateString() === fechaComparar.toDateString();
+        }
+
+        function esReservaActiva(reserva) {
+            const hoy = new Date().toISOString().split('T')[0];
+            return reserva.fechaSalida > hoy;
+        }
+
+        // Gestión de temas
+        function toggleTheme() {
+            tema = tema === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', tema);
+            localStorage.setItem('tema', tema);
+            
+            const icon = document.getElementById('theme-icon');
+            icon.className = tema === 'light' ? 'fas fa-moon text-lg' : 'fas fa-sun text-lg';
+            
+            showToast(`Tema ${tema === 'light' ? 'claro' : 'oscuro'} activado`, 'info', 2000);
+        }
 
         // Navegación entre páginas
         function showPage(pageId) {
+            paginaActiva = pageId;
+            
+            // Ocultar todas las páginas
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            
+            // Reset nav tabs
             document.querySelectorAll('.nav-tab').forEach(t => {
                 t.classList.remove('bg-blue-500', 'text-white');
-                t.classList.add('bg-gray-200', 'text-gray-700');
+                t.style.background = 'var(--bg-secondary)';
+                t.style.color = 'var(--text-secondary)';
             });
             
+            // Mostrar página activa
             document.getElementById(pageId).classList.remove('hidden');
-            event.target.classList.remove('bg-gray-200', 'text-gray-700');
-            event.target.classList.add('bg-blue-500', 'text-white');
             
-            if(pageId === 'calendario') generarCalendario();
-            if(pageId === 'lista') mostrarListaReservas();
-            if(pageId === 'disponibilidad') mostrarDisponibilidad();
-            if(pageId === 'estadisticas') mostrarEstadisticas();
+            // Activar tab
+            event.target.classList.add('bg-blue-500', 'text-white');
+            event.target.style.background = '#3b82f6';
+            event.target.style.color = 'white';
+            
+            // Cargar contenido específico
+            switch(pageId) {
+                case 'dashboard':
+                    cargarDashboard();
+                    break;
+                case 'calendario':
+                    generarCalendario();
+                    break;
+                case 'lista':
+                    mostrarListaReservas();
+                    break;
+                case 'disponibilidad':
+                    mostrarDisponibilidad();
+                    break;
+                case 'estadisticas':
+                    mostrarEstadisticas();
+                    setTimeout(generarGraficos, 100); // Delay para asegurar que el DOM esté listo
+                    break;
+            }
+        }
+
+        // Dashboard principal
+        function cargarDashboard() {
+            actualizarHeaderStats();
+            cargarProximos7Dias();
+            cargarCheckinsHoy();
+            cargarCheckoutsHoy();
+            cargarProximasReservas();
+        }
+
+        function actualizarHeaderStats() {
+            const hoy = new Date().toISOString().split('T')[0];
+            
+            // Habitaciones ocupadas hoy
+            const ocupadasHoy = reservas.filter(r => {
+                const entrada = new Date(r.fechaEntrada);
+                const salida = new Date(r.fechaSalida);
+                const fecha = new Date(hoy);
+                return fecha >= entrada && fecha < salida;
+            }).length;
+            
+            // Check-ins y check-outs de hoy
+            const checkinsHoy = reservas.filter(r => r.fechaEntrada === hoy).length;
+            const checkoutsHoy = reservas.filter(r => r.fechaSalida === hoy).length;
+            
+            // Actualizar header
+            document.getElementById('header-ocupadas').textContent = ocupadasHoy;
+            document.getElementById('header-disponibles').textContent = 5 - ocupadasHoy;
+            document.getElementById('header-checkins').textContent = checkinsHoy;
+            document.getElementById('header-checkouts').textContent = checkoutsHoy;
+            
+            // Actualizar dashboard cards
+            document.getElementById('dash-checkins-hoy').textContent = checkinsHoy;
+            document.getElementById('dash-checkouts-hoy').textContent = checkoutsHoy;
+            document.getElementById('dash-ocupacion').textContent = Math.round((ocupadasHoy / 5) * 100) + '%';
+            document.getElementById('dash-habitaciones-ocupadas').textContent = `${ocupadasHoy} de 5 ocupadas`;
+            
+            // Pendientes
+            const checkinsPendientes = reservas.filter(r => 
+                r.fechaEntrada === hoy && !r.checkedIn
+            ).length;
+            const checkoutsPendientes = reservas.filter(r => 
+                r.fechaSalida === hoy && !r.checkedOut
+            ).length;
+            
+            document.getElementById('dash-checkins-pendientes').textContent = `${checkinsPendientes} pendientes`;
+            document.getElementById('dash-checkouts-pendientes').textContent = `${checkoutsPendientes} pendientes`;
+        }
+
+        function cargarProximos7Dias() {
+            const container = document.getElementById('proximos-dias');
+            container.innerHTML = '';
+            
+            const hoy = new Date();
+            
+            for (let i = 0; i < 7; i++) {
+                const fecha = new Date(hoy);
+                fecha.setDate(fecha.getDate() + i);
+                const fechaStr = fecha.toISOString().split('T')[0];
+                
+                const reservasDelDia = reservas.filter(r => {
+                    const entrada = new Date(r.fechaEntrada);
+                    const salida = new Date(r.fechaSalida);
+                    const fechaComparar = new Date(fechaStr);
+                    return fechaComparar >= entrada && fechaComparar < salida;
+                });
+                
+                const checkins = reservas.filter(r => r.fechaEntrada === fechaStr);
+                const checkouts = reservas.filter(r => r.fechaSalida === fechaStr);
+                
+                const diaDiv = document.createElement('div');
+                diaDiv.className = `dashboard-card p-4 ${i === 0 ? 'bg-blue-50' : ''}`;
+                diaDiv.style.background = i === 0 ? 'var(--bg-secondary)' : 'var(--bg-primary)';
+                
+                diaDiv.innerHTML = `
+                    <div class="text-center">
+                        <div class="font-bold text-lg" style="color: var(--text-primary);">
+                            ${fecha.getDate()}
+                        </div>
+                        <div class="text-sm mb-2" style="color: var(--text-secondary);">
+                            ${fecha.toLocaleDateString('es-ES', { weekday: 'short' })}
+                        </div>
+                        <div class="text-xs space-y-1">
+                            <div class="text-green-600">✅ ${checkins.length} entradas</div>
+                            <div class="text-red-600">🚪 ${checkouts.length} salidas</div>
+                            <div style="color: var(--text-secondary);">🏠 ${reservasDelDia.length} ocupadas</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(diaDiv);
+            }
+        }
+
+        function cargarCheckinsHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const container = document.getElementById('checkins-hoy');
+            
+            const checkinsHoy = reservas.filter(r => r.fechaEntrada === hoy);
+            
+            container.innerHTML = '';
+            
+            if (checkinsHoy.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No hay check-ins programados para hoy</p>';
+                return;
+            }
+            
+            checkinsHoy.forEach(reserva => {
+                const hab = habitacionesConfig[reserva.habitacion];
+                const checkedIn = reserva.checkedIn;
+                
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-3 rounded-lg border ${checkedIn ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`;
+                item.style.background = checkedIn ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)';
+                
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="inline-block w-3 h-3 rounded-full mr-3" style="background: ${hab.color}"></span>
+                        <div>
+                            <div class="font-semibold" style="color: var(--text-primary);">${reserva.nombreHuesped}</div>
+                            <div class="text-sm" style="color: var(--text-secondary);">${hab.nombre}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        ${checkedIn ? 
+                            '<span class="status-badge status-available">Realizado</span>' :
+                            `<button onclick="realizarCheckInReserva('${reserva.id || reservas.indexOf(reserva)}')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-all duration-300">
+                                Check-in
+                            </button>`
+                        }
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        function cargarCheckoutsHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const container = document.getElementById('checkouts-hoy');
+            
+            const checkoutsHoy = reservas.filter(r => r.fechaSalida === hoy);
+            
+            container.innerHTML = '';
+            
+            if (checkoutsHoy.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No hay check-outs programados para hoy</p>';
+                return;
+            }
+            
+            checkoutsHoy.forEach(reserva => {
+                const hab = habitacionesConfig[reserva.habitacion];
+                const checkedOut = reserva.checkedOut;
+                
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-3 rounded-lg border ${checkedOut ? 'bg-gray-50 border-gray-200' : 'bg-red-50 border-red-200'}`;
+                item.style.background = checkedOut ? 'var(--bg-secondary)' : 'rgba(239, 68, 68, 0.1)';
+                
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="inline-block w-3 h-3 rounded-full mr-3" style="background: ${hab.color}"></span>
+                        <div>
+                            <div class="font-semibold" style="color: var(--text-primary);">${reserva.nombreHuesped}</div>
+                            <div class="text-sm" style="color: var(--text-secondary);">${hab.nombre}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        ${checkedOut ? 
+                            '<span class="status-badge status-available">Realizado</span>' :
+                            `<button onclick="realizarCheckOutReserva('${reserva.id || reservas.indexOf(reserva)}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-all duration-300">
+                                Check-out
+                            </button>`
+                        }
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        function cargarProximasReservas() {
+            const container = document.getElementById('proximas-reservas');
+            const hoy = new Date();
+            
+            const proximasReservas = reservas
+                .filter(r => new Date(r.fechaEntrada) > hoy)
+                .sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada))
+                .slice(0, 5);
+            
+            container.innerHTML = '';
+            
+            if (proximasReservas.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No hay reservas próximas</p>';
+                return;
+            }
+            
+            proximasReservas.forEach(reserva => {
+                const hab = habitacionesConfig[reserva.habitacion];
+                const fechaEntrada = new Date(reserva.fechaEntrada);
+                const diasRestantes = Math.ceil((fechaEntrada - hoy) / (1000 * 60 * 60 * 24));
+                
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 rounded-lg border';
+                item.style.background = 'var(--bg-secondary)';
+                item.style.borderColor = 'var(--border-color)';
+                
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="inline-block w-3 h-3 rounded-full mr-3" style="background: ${hab.color}"></span>
+                        <div>
+                            <div class="font-semibold" style="color: var(--text-primary);">${reserva.nombreHuesped}</div>
+                            <div class="text-sm" style="color: var(--text-secondary);">${hab.nombre} • ${formatearFecha(reserva.fechaEntrada, 'corta')}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-semibold" style="color: var(--text-primary);">En ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}</div>
+                        <div class="text-xs" style="color: var(--text-secondary);">${calcularNoches(reserva.fechaEntrada, reserva.fechaSalida)} noche${calcularNoches(reserva.fechaEntrada, reserva.fechaSalida) !== 1 ? 's' : ''}</div>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
         }
 
         // Manejo de modales
         function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
+            const modal = document.getElementById(modalId);
+            modal.classList.add('active');
+            
+            // Si es el modal de nueva reserva, configurar fechas y precios
+            if (modalId === 'nuevaReserva') {
+                const hoy = new Date().toISOString().split('T')[0];
+                document.getElementById('fechaEntrada').value = hoy;
+                const mañana = new Date();
+                mañana.setDate(mañana.getDate() + 1);
+                document.getElementById('fechaSalida').value = mañana.toISOString().split('T')[0];
+                document.getElementById('precio').value = '45000';
+                calcularPrecioTotal();
+            }
         }
 
         function closeModal(modalId) {
@@ -349,9 +1215,60 @@
             generarCalendario();
         }
 
+        function verHoy() {
+            fechaActual = new Date();
+            generarCalendario();
+            showToast('Calendario actualizado al mes actual', 'info', 2000);
+        }
+
+        function calcularPrecioTotal() {
+            const fechaEntrada = document.getElementById('fechaEntrada').value;
+            const fechaSalida = document.getElementById('fechaSalida').value;
+            const precio = parseFloat(document.getElementById('precio').value) || 0;
+            const habitacionId = document.getElementById('habitacion').value;
+            
+            if (fechaEntrada && fechaSalida && fechaEntrada < fechaSalida) {
+                const noches = calcularNoches(fechaEntrada, fechaSalida);
+                const total = noches * precio;
+                
+                document.getElementById('totalNoches').textContent = noches;
+                document.getElementById('precioTotal').textContent = total.toLocaleString();
+                
+                // Verificar disponibilidad si hay habitación seleccionada
+                if (habitacionId) {
+                    const disponible = verificarDisponibilidad(habitacionId, fechaEntrada, fechaSalida);
+                    const divDisponibilidad = document.getElementById('disponibilidadHab');
+                    if (disponible) {
+                        divDisponibilidad.innerHTML = '<span class="text-green-600">✅ Habitación disponible</span>';
+                    } else {
+                        divDisponibilidad.innerHTML = '<span class="text-red-600">❌ Habitación ocupada en estas fechas</span>';
+                    }
+                }
+            } else {
+                document.getElementById('totalNoches').textContent = '0';
+                document.getElementById('precioTotal').textContent = '0';
+            }
+        }
+
+        function verificarDisponibilidad(habitacion, fechaEntrada, fechaSalida) {
+            return !reservas.some(r => {
+                if (r.habitacion != habitacion) return false;
+                
+                const entradaExistente = new Date(r.fechaEntrada);
+                const salidaExistente = new Date(r.fechaSalida);
+                const nuevaEntrada = new Date(fechaEntrada);
+                const nuevaSalida = new Date(fechaSalida);
+                
+                // Verificar solapamiento
+                return (nuevaEntrada < salidaExistente) && (nuevaSalida > entradaExistente);
+            });
+        }
+
         function generarCalendario() {
             const container = document.getElementById('calendarioDias');
             const mesActualElement = document.getElementById('mesActual');
+            
+            if (!container || !mesActualElement) return;
             
             container.innerHTML = '';
             
@@ -386,15 +1303,23 @@
                 const diaElement = document.createElement('div');
                 diaElement.className = 'calendar-day';
                 
+                const fechaStr = `${año}-${(mes+1).toString().padStart(2,'0')}-${dia.toString().padStart(2,'0')}`;
+                
                 // Marcar día actual
                 if (dia === hoy.getDate() && mes === hoy.getMonth() && año === hoy.getFullYear()) {
                     diaElement.classList.add('today');
                 }
                 
+                // Verificar check-ins y check-outs
+                const checkinsHoy = reservas.filter(r => r.fechaEntrada === fechaStr);
+                const checkoutsHoy = reservas.filter(r => r.fechaSalida === fechaStr);
+                
+                if (checkinsHoy.length > 0) diaElement.classList.add('has-checkin');
+                if (checkoutsHoy.length > 0) diaElement.classList.add('has-checkout');
+                
                 diaElement.innerHTML = `<div class="font-bold text-center mb-1">${dia}</div>`;
                 
-                // Buscar reservas para este día
-                const fechaStr = `${año}-${(mes+1).toString().padStart(2,'0')}-${dia.toString().padStart(2,'0')}`;
+                // Buscar reservas activas para este día
                 const reservasDelDia = reservas.filter(r => {
                     const entrada = new Date(r.fechaEntrada);
                     const salida = new Date(r.fechaSalida);
@@ -402,72 +1327,282 @@
                     return fecha >= entrada && fecha < salida;
                 });
                 
-                // Mostrar reservas con nombres y números de habitación MÁS GRANDES
-                reservasDelDia.forEach(reserva => {
+                // Mostrar reservas mejoradas
+                reservasDelDia.forEach((reserva, index) => {
                     const hab = habitacionesConfig[reserva.habitacion];
                     const reservaDiv = document.createElement('div');
-                    reservaDiv.className = `reserva-item ${hab.clase}`;
-                    // Texto más grande y claro para iPhone
-                    reservaDiv.innerHTML = `<div style="font-size: 11px; font-weight: bold;">${reserva.nombreHuesped.split(' ')[0]}</div><div style="font-size: 10px;">Hab. ${reserva.habitacion}</div>`;
+                    
+                    let clases = `reserva-item ${hab.clase}`;
+                    if (reserva.fechaEntrada === fechaStr) clases += ' checkin';
+                    if (reserva.fechaSalida === fechaStr) clases += ' checkout';
+                    
+                    reservaDiv.className = clases;
+                    reservaDiv.onclick = () => verDetallesReserva(reservas.indexOf(reserva));
+                    
+                    const nombreCorto = reserva.nombreHuesped.split(' ')[0];
+                    const iniciales = reserva.nombreHuesped.split(' ').map(n => n[0]).join('').substring(0, 2);
+                    
+                    reservaDiv.innerHTML = `
+                        <div style="font-size: 11px; font-weight: bold;">${nombreCorto.length > 8 ? iniciales : nombreCorto}</div>
+                        <div style="font-size: 9px;">Hab. ${reserva.habitacion}</div>
+                    `;
+                    
                     diaElement.appendChild(reservaDiv);
                 });
+                
+                // Agregar indicadores de check-in/out
+                if (checkinsHoy.length > 0 || checkoutsHoy.length > 0) {
+                    const indicators = document.createElement('div');
+                    indicators.className = 'absolute bottom-1 right-1 text-xs';
+                    indicators.innerHTML = `
+                        ${checkinsHoy.length > 0 ? `<span class="text-green-600 mr-1">📥${checkinsHoy.length}</span>` : ''}
+                        ${checkoutsHoy.length > 0 ? `<span class="text-red-600">📤${checkoutsHoy.length}</span>` : ''}
+                    `;
+                    diaElement.style.position = 'relative';
+                    diaElement.appendChild(indicators);
+                }
                 
                 container.appendChild(diaElement);
             }
         }
 
-        // Lista de reservas
-        function mostrarListaReservas() {
-            const lista = document.getElementById('listaReservas');
-            lista.innerHTML = '';
+        function verDetallesReserva(index) {
+            const reserva = reservas[index];
+            const hab = habitacionesConfig[reserva.habitacion];
             
-            reservas.forEach((reserva, index) => {
-                const hab = habitacionesConfig[reserva.habitacion];
-                const reservaDiv = document.createElement('div');
-                reservaDiv.className = 'bg-gray-50 p-4 rounded-lg border';
-                reservaDiv.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex items-center">
-                            <span class="inline-block w-4 h-4 rounded-full mr-2" style="background: ${hab.color}"></span>
-                            <h3 class="font-bold text-lg">${reserva.nombreHuesped} - ${hab.nombre}</h3>
+            const contenido = document.getElementById('contenidoVerReserva');
+            const noches = calcularNoches(reserva.fechaEntrada, reserva.fechaSalida);
+            const total = noches * (reserva.precio || 0);
+            
+            contenido.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center">
+                        <span class="inline-block w-6 h-6 rounded-full mr-3" style="background: ${hab.color}"></span>
+                        <div>
+                            <h3 class="text-xl font-bold" style="color: var(--text-primary);">${reserva.nombreHuesped}</h3>
+                            <p class="text-lg" style="color: var(--text-secondary);">${hab.nombre}</p>
                         </div>
-                        <button onclick="eliminarReserva(${index})" class="text-red-500 hover:text-red-700">
-                            <i class="fas fa-trash-alt"></i>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">Detalles de Estadía</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span style="color: var(--text-secondary);">Check-in:</span>
+                                    <span style="color: var(--text-primary);">${formatearFecha(reserva.fechaEntrada, 'corta')}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span style="color: var(--text-secondary);">Check-out:</span>
+                                    <span style="color: var(--text-primary);">${formatearFecha(reserva.fechaSalida, 'corta')}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span style="color: var(--text-secondary);">Noches:</span>
+                                    <span style="color: var(--text-primary);">${noches}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span style="color: var(--text-secondary);">Personas:</span>
+                                    <span style="color: var(--text-primary);">${reserva.numPersonas}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-3" style="color: var(--text-primary);">Información de Pago</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span style="color: var(--text-secondary);">Precio por noche:</span>
+                                    <span style="color: var(--text-primary);">$${parseInt(reserva.precio || 0).toLocaleString()}</span>
+                                </div>
+                                <div class="flex justify-between font-bold text-lg">
+                                    <span style="color: var(--text-primary);">Total:</span>
+                                    <span style="color: var(--text-primary);">$${total.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${reserva.notas ? `
+                        <div>
+                            <h4 class="font-semibold mb-2" style="color: var(--text-primary);">Notas</h4>
+                            <p class="text-sm p-3 rounded-lg" style="color: var(--text-secondary); background: var(--bg-secondary);">${reserva.notas}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="editarReserva(${index})" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-all duration-300">
+                            <i class="fas fa-edit mr-2"></i>Editar
+                        </button>
+                        <button onclick="eliminarReserva(${index})" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-all duration-300">
+                            <i class="fas fa-trash mr-2"></i>Eliminar
                         </button>
                     </div>
-                    <div class="grid md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <p><strong>Entrada:</strong> ${reserva.fechaEntrada}</p>
-                            <p><strong>Salida:</strong> ${reserva.fechaSalida}</p>
+                </div>
+            `;
+            
+            openModal('modalVerReserva');
+        }
+
+        // Lista de reservas mejorada
+        function mostrarListaReservas() {
+            let reservasFiltradas = [...reservas];
+            
+            // Aplicar filtros
+            const busqueda = document.getElementById('buscarReserva').value.toLowerCase();
+            const habitacionFiltro = document.getElementById('filtroHabitacion').value;
+            
+            if (busqueda) {
+                reservasFiltradas = reservasFiltradas.filter(r => 
+                    r.nombreHuesped.toLowerCase().includes(busqueda) ||
+                    r.fechaEntrada.includes(busqueda) ||
+                    r.fechaSalida.includes(busqueda) ||
+                    r.habitacion.toString().includes(busqueda)
+                );
+            }
+            
+            if (habitacionFiltro) {
+                reservasFiltradas = reservasFiltradas.filter(r => r.habitacion == habitacionFiltro);
+            }
+            
+            // Filtro por estado
+            if (filtroActual === 'activas') {
+                reservasFiltradas = reservasFiltradas.filter(esReservaActiva);
+            } else if (filtroActual === 'pasadas') {
+                reservasFiltradas = reservasFiltradas.filter(r => !esReservaActiva(r));
+            }
+            
+            // Ordenar por fecha de entrada (más reciente primero)
+            reservasFiltradas.sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada));
+            
+            const lista = document.getElementById('listaReservas');
+            const totalElement = document.getElementById('total-reservas-mostradas');
+            
+            lista.innerHTML = '';
+            totalElement.textContent = reservasFiltradas.length;
+            
+            if (reservasFiltradas.length === 0) {
+                lista.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-lg text-gray-500">No se encontraron reservas</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            reservasFiltradas.forEach((reserva, filteredIndex) => {
+                const originalIndex = reservas.indexOf(reserva);
+                const hab = habitacionesConfig[reserva.habitacion];
+                const noches = calcularNoches(reserva.fechaEntrada, reserva.fechaSalida);
+                const total = noches * (reserva.precio || 0);
+                const esActiva = esReservaActiva(reserva);
+                const esHoyCheckIn = esHoy(reserva.fechaEntrada);
+                const esHoyCheckOut = esHoy(reserva.fechaSalida);
+                
+                const reservaDiv = document.createElement('div');
+                reservaDiv.className = `dashboard-card p-6 border-l-4 cursor-pointer hover:shadow-lg transition-all duration-300 ${!esActiva ? 'opacity-75' : ''}`;
+                reservaDiv.style.borderLeftColor = hab.color;
+                reservaDiv.onclick = () => verDetallesReserva(originalIndex);
+                
+                const statusBadges = [];
+                if (esHoyCheckIn) statusBadges.push('<span class="status-badge status-checkout">Check-in Hoy</span>');
+                if (esHoyCheckOut) statusBadges.push('<span class="status-badge status-occupied">Check-out Hoy</span>');
+                if (!esActiva) statusBadges.push('<span class="status-badge bg-gray-100 text-gray-600 border-gray-300">Finalizada</span>');
+                
+                reservaDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center">
+                            <span class="inline-block w-5 h-5 rounded-full mr-3" style="background: ${hab.color}"></span>
+                            <div>
+                                <h3 class="font-bold text-xl" style="color: var(--text-primary);">${reserva.nombreHuesped}</h3>
+                                <p class="text-lg" style="color: var(--text-secondary);">${hab.nombre}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p><strong>Personas:</strong> ${reserva.numPersonas}</p>
-                            <p><strong>Precio:</strong> $${parseInt(reserva.precio).toLocaleString()}</p>
+                        <div class="flex items-center space-x-2">
+                            ${statusBadges.join(' ')}
+                            <button onclick="event.stopPropagation(); eliminarReserva(${originalIndex})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-all duration-300">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </div>
                     </div>
-                    ${reserva.notas ? `<p class="text-gray-600 mt-2"><strong>Notas:</strong> ${reserva.notas}</p>` : ''}
+                    
+                    <div class="grid md:grid-cols-3 gap-6 text-sm mb-4">
+                        <div>
+                            <h4 class="font-semibold mb-2" style="color: var(--text-primary);">Fechas</h4>
+                            <p><strong>Entrada:</strong> ${formatearFecha(reserva.fechaEntrada, 'corta')}</p>
+                            <p><strong>Salida:</strong> ${formatearFecha(reserva.fechaSalida, 'corta')}</p>
+                            <p class="text-blue-600"><strong>Noches:</strong> ${noches}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2" style="color: var(--text-primary);">Huéspedes</h4>
+                            <p><strong>Personas:</strong> ${reserva.numPersonas}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2" style="color: var(--text-primary);">Pago</h4>
+                            <p><strong>Por noche:</strong> $${parseInt(reserva.precio || 0).toLocaleString()}</p>
+                            <p class="text-green-600 font-bold"><strong>Total:</strong> $${total.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    
+                    ${reserva.notas ? `
+                        <div class="mt-4 p-3 rounded-lg" style="background: var(--bg-secondary);">
+                            <p class="text-sm" style="color: var(--text-secondary);"><strong>Notas:</strong> ${reserva.notas}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${esHoyCheckIn || esHoyCheckOut ? `
+                        <div class="mt-4 flex space-x-2">
+                            ${esHoyCheckIn && !reserva.checkedIn ? `
+                                <button onclick="event.stopPropagation(); realizarCheckInReserva(${originalIndex})" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>Realizar Check-in
+                                </button>
+                            ` : ''}
+                            ${esHoyCheckOut && !reserva.checkedOut ? `
+                                <button onclick="event.stopPropagation(); realizarCheckOutReserva(${originalIndex})" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Realizar Check-out
+                                </button>
+                            ` : ''}
+                        </div>
+                    ` : ''}
                 `;
                 lista.appendChild(reservaDiv);
             });
         }
 
-        // Disponibilidad
+        function filtrarPorEstado(estado) {
+            filtroActual = estado;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.filtro-btn').forEach(btn => {
+                if (btn.dataset.filtro === estado) {
+                    btn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                    btn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                } else {
+                    btn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                    btn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                }
+            });
+            
+            mostrarListaReservas();
+        }
+
+        function filtrarReservas() {
+            mostrarListaReservas();
+        }
+
+        // Disponibilidad mejorada
         function mostrarDisponibilidad() {
             const container = document.getElementById('habitacionesStatus');
-            container.innerHTML = '';
-            
             const hoy = new Date().toISOString().split('T')[0];
+            
+            let disponibles = 0, ocupadas = 0, limpieza = 0, mantenimiento = 0;
+            
+            container.innerHTML = '';
             
             Object.keys(habitacionesConfig).forEach(numHab => {
                 const hab = habitacionesConfig[numHab];
                 
-                const ocupada = reservas.some(r => {
-                    const entrada = new Date(r.fechaEntrada);
-                    const salida = new Date(r.fechaSalida);
-                    const fecha = new Date(hoy);
-                    return r.habitacion == numHab && fecha >= entrada && fecha < salida;
-                });
-                
+                // Buscar reserva activa
                 const reservaActual = reservas.find(r => {
                     const entrada = new Date(r.fechaEntrada);
                     const salida = new Date(r.fechaSalida);
@@ -475,63 +1610,625 @@
                     return r.habitacion == numHab && fecha >= entrada && fecha < salida;
                 });
                 
+                const checkoutHoy = reservas.find(r => 
+                    r.habitacion == numHab && r.fechaSalida === hoy
+                );
+                const checkinHoy = reservas.find(r => 
+                    r.habitacion == numHab && r.fechaEntrada === hoy
+                );
+                
+                let estado, estadoTexto, estadoColor, acciones = '';
+                
+                if (reservaActual) {
+                    estado = 'ocupada';
+                    estadoTexto = '🔴 OCUPADA';
+                    estadoColor = 'bg-red-500';
+                    ocupadas++;
+                } else if (checkoutHoy && !checkoutHoy.checkedOut) {
+                    estado = 'checkout-pendiente';
+                    estadoTexto = '🟡 CHECK-OUT PENDIENTE';
+                    estadoColor = 'bg-yellow-500';
+                    limpieza++;
+                } else if (checkinHoy && !checkinHoy.checkedIn) {
+                    estado = 'checkin-pendiente';
+                    estadoTexto = '🟠 CHECK-IN PENDIENTE';
+                    estadoColor = 'bg-orange-500';
+                    disponibles++;
+                } else {
+                    estado = 'disponible';
+                    estadoTexto = '🟢 DISPONIBLE';
+                    estadoColor = 'bg-green-500';
+                    disponibles++;
+                }
+                
+                // Generar acciones según el estado
+                if (reservaActual) {
+                    if (reservaActual.fechaSalida === hoy && !reservaActual.checkedOut) {
+                        acciones = `
+                            <button onclick="realizarCheckOutReserva(${reservas.indexOf(reservaActual)})" 
+                                    class="w-full mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Check-out
+                            </button>
+                        `;
+                    }
+                } else if (checkinHoy && !checkinHoy.checkedIn) {
+                    acciones = `
+                        <button onclick="realizarCheckInReserva(${reservas.indexOf(checkinHoy)})" 
+                                class="w-full mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Check-in
+                        </button>
+                    `;
+                }
+                
                 const habDiv = document.createElement('div');
-                habDiv.className = `p-6 rounded-lg text-white`;
-                habDiv.style.backgroundColor = hab.color;
+                habDiv.className = `room-status dashboard-card text-white ${estadoColor}`;
+                habDiv.style.background = `linear-gradient(135deg, ${hab.color}, ${adjustBrightness(hab.color, -20)})`;
+                
                 habDiv.innerHTML = `
-                    <h3 class="text-xl font-bold mb-2">${hab.emoji} ${hab.nombre}</h3>
-                    <p class="mb-2"><strong>Estado:</strong> ${ocupada ? '🔴 OCUPADA' : '🟢 DISPONIBLE'}</p>
-                    ${ocupada ? `<p><strong>Huésped:</strong> ${reservaActual.nombreHuesped}</p>` : ''}
-                    <p><strong>Capacidad:</strong> 1-4 personas</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-2xl font-bold">${hab.emoji} ${hab.nombre}</h3>
+                        <div class="text-right">
+                            <div class="text-sm opacity-75">Precio base</div>
+                            <div class="font-bold">$${hab.precio.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold">Estado:</span>
+                            <span class="font-bold">${estadoTexto}</span>
+                        </div>
+                        
+                        ${reservaActual ? `
+                            <div class="mt-3 p-3 bg-black bg-opacity-20 rounded-lg">
+                                <p class="font-semibold">${reservaActual.nombreHuesped}</p>
+                                <p class="text-sm opacity-75">
+                                    ${formatearFecha(reservaActual.fechaEntrada, 'corta')} - 
+                                    ${formatearFecha(reservaActual.fechaSalida, 'corta')}
+                                </p>
+                                <p class="text-xs opacity-75">${reservaActual.numPersonas} persona${reservaActual.numPersonas !== 1 ? 's' : ''}</p>
+                            </div>
+                        ` : checkinHoy ? `
+                            <div class="mt-3 p-3 bg-black bg-opacity-20 rounded-lg">
+                                <p class="font-semibold">Próximo: ${checkinHoy.nombreHuesped}</p>
+                                <p class="text-sm opacity-75">
+                                    Check-in hoy - Salida: ${formatearFecha(checkinHoy.fechaSalida, 'corta')}
+                                </p>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="text-sm opacity-75">
+                        <p><i class="fas fa-users mr-2"></i>Capacidad: 1-4 personas</p>
+                        <p><i class="fas fa-bed mr-2"></i>Comodidades: WiFi, TV, A/C</p>
+                    </div>
+                    
+                    ${acciones}
                 `;
+                
                 container.appendChild(habDiv);
+            });
+            
+            // Actualizar resumen
+            document.getElementById('disponibles-count').textContent = disponibles;
+            document.getElementById('ocupadas-count').textContent = ocupadas;
+            document.getElementById('limpieza-count').textContent = limpieza;
+            document.getElementById('mantenimiento-count').textContent = mantenimiento;
+            
+            // Cargar historial de checks
+            cargarHistorialChecks();
+        }
+
+        function adjustBrightness(hex, percent) {
+            const num = parseInt(hex.replace("#", ""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const B = (num >> 8 & 0x00FF) + amt;
+            const G = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (B < 255 ? B < 1 ? 0 : B : 255) * 0x100 + (G < 255 ? G < 1 ? 0 : G : 255)).toString(16).slice(1);
+        }
+
+        function cargarHistorialChecks() {
+            const container = document.getElementById('historial-checkins');
+            container.innerHTML = '';
+            
+            const historialReciente = historialChecks
+                .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+                .slice(0, 10);
+            
+            if (historialReciente.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No hay actividad reciente</p>';
+                return;
+            }
+            
+            historialReciente.forEach(check => {
+                const hab = habitacionesConfig[check.habitacion];
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 rounded-lg border';
+                item.style.background = 'var(--bg-secondary)';
+                item.style.borderColor = 'var(--border-color)';
+                
+                const icon = check.tipo === 'checkin' ? 
+                    '<i class="fas fa-sign-in-alt text-green-600"></i>' : 
+                    '<i class="fas fa-sign-out-alt text-red-600"></i>';
+                
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        ${icon}
+                        <span class="inline-block w-3 h-3 rounded-full mx-3" style="background: ${hab.color}"></span>
+                        <div>
+                            <div class="font-semibold" style="color: var(--text-primary);">${check.nombreHuesped}</div>
+                            <div class="text-sm" style="color: var(--text-secondary);">${hab.nombre}</div>
+                        </div>
+                    </div>
+                    <div class="text-right text-sm" style="color: var(--text-secondary);">
+                        ${new Date(check.fecha).toLocaleDateString('es-ES', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
+                    </div>
+                `;
+                
+                container.appendChild(item);
             });
         }
 
-        // Estadísticas
+        // Funciones de Check-in y Check-out
+        function realizarCheckIn() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const checkinsDisponibles = reservas.filter(r => 
+                r.fechaEntrada === hoy && !r.checkedIn
+            );
+            
+            if (checkinsDisponibles.length === 0) {
+                showToast('No hay check-ins pendientes para hoy', 'info');
+                return;
+            }
+            
+            mostrarSelectorCheckIn(checkinsDisponibles);
+        }
+
+        function realizarCheckOut() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const checkoutsDisponibles = reservas.filter(r => 
+                r.fechaSalida === hoy && !r.checkedOut
+            );
+            
+            if (checkoutsDisponibles.length === 0) {
+                showToast('No hay check-outs pendientes para hoy', 'info');
+                return;
+            }
+            
+            mostrarSelectorCheckOut(checkoutsDisponibles);
+        }
+
+        function mostrarSelectorCheckIn(checkinsDisponibles) {
+            const contenido = document.getElementById('contenidoCheckInOut');
+            document.getElementById('tituloCheckInOut').innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Seleccionar Check-in';
+            
+            contenido.innerHTML = `
+                <div class="space-y-4">
+                    <p style="color: var(--text-secondary);">Selecciona la reserva para realizar el check-in:</p>
+                    ${checkinsDisponibles.map((reserva, index) => {
+                        const originalIndex = reservas.indexOf(reserva);
+                        const hab = habitacionesConfig[reserva.habitacion];
+                        return `
+                            <div class="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-blue-50 transition-all duration-300"
+                                 style="border-color: var(--border-color); background: var(--bg-primary);"
+                                 onclick="realizarCheckInReserva(${originalIndex})">
+                                <div class="flex items-center">
+                                    <span class="inline-block w-4 h-4 rounded-full mr-3" style="background: ${hab.color}"></span>
+                                    <div>
+                                        <div class="font-semibold" style="color: var(--text-primary);">${reserva.nombreHuesped}</div>
+                                        <div class="text-sm" style="color: var(--text-secondary);">${hab.nombre} • ${reserva.numPersonas} persona${reserva.numPersonas !== 1 ? 's' : ''}</div>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            openModal('modalCheckInOut');
+        }
+
+        function mostrarSelectorCheckOut(checkoutsDisponibles) {
+            const contenido = document.getElementById('contenidoCheckInOut');
+            document.getElementById('tituloCheckInOut').innerHTML = '<i class="fas fa-sign-out-alt mr-2"></i>Seleccionar Check-out';
+            
+            contenido.innerHTML = `
+                <div class="space-y-4">
+                    <p style="color: var(--text-secondary);">Selecciona la reserva para realizar el check-out:</p>
+                    ${checkoutsDisponibles.map((reserva, index) => {
+                        const originalIndex = reservas.indexOf(reserva);
+                        const hab = habitacionesConfig[reserva.habitacion];
+                        return `
+                            <div class="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-red-50 transition-all duration-300"
+                                 style="border-color: var(--border-color); background: var(--bg-primary);"
+                                 onclick="realizarCheckOutReserva(${originalIndex})">
+                                <div class="flex items-center">
+                                    <span class="inline-block w-4 h-4 rounded-full mr-3" style="background: ${hab.color}"></span>
+                                    <div>
+                                        <div class="font-semibold" style="color: var(--text-primary);">${reserva.nombreHuesped}</div>
+                                        <div class="text-sm" style="color: var(--text-secondary);">${hab.nombre} • ${reserva.numPersonas} persona${reserva.numPersonas !== 1 ? 's' : ''}</div>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            openModal('modalCheckInOut');
+        }
+
+        function realizarCheckInReserva(index) {
+            const reserva = reservas[index];
+            const hab = habitacionesConfig[reserva.habitacion];
+            
+            reserva.checkedIn = true;
+            reserva.checkInTime = new Date().toISOString();
+            
+            // Agregar al historial
+            historialChecks.unshift({
+                tipo: 'checkin',
+                nombreHuesped: reserva.nombreHuesped,
+                habitacion: reserva.habitacion,
+                fecha: new Date().toISOString()
+            });
+            
+            // Guardar en localStorage
+            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
+            localStorage.setItem('historialChecks', JSON.stringify(historialChecks));
+            
+            closeModal('modalCheckInOut');
+            showToast(`✅ Check-in realizado para ${reserva.nombreHuesped} en ${hab.nombre}`, 'success');
+            
+            // Actualizar vistas
+            if (paginaActiva === 'dashboard') cargarDashboard();
+            if (paginaActiva === 'disponibilidad') mostrarDisponibilidad();
+            if (paginaActiva === 'lista') mostrarListaReservas();
+        }
+
+        function realizarCheckOutReserva(index) {
+            const reserva = reservas[index];
+            const hab = habitacionesConfig[reserva.habitacion];
+            
+            reserva.checkedOut = true;
+            reserva.checkOutTime = new Date().toISOString();
+            
+            // Agregar al historial
+            historialChecks.unshift({
+                tipo: 'checkout',
+                nombreHuesped: reserva.nombreHuesped,
+                habitacion: reserva.habitacion,
+                fecha: new Date().toISOString()
+            });
+            
+            // Guardar en localStorage
+            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
+            localStorage.setItem('historialChecks', JSON.stringify(historialChecks));
+            
+            closeModal('modalCheckInOut');
+            showToast(`✅ Check-out realizado para ${reserva.nombreHuesped} de ${hab.nombre}`, 'success');
+            
+            // Actualizar vistas
+            if (paginaActiva === 'dashboard') cargarDashboard();
+            if (paginaActiva === 'disponibilidad') mostrarDisponibilidad();
+            if (paginaActiva === 'lista') mostrarListaReservas();
+        }
+
+        // Estadísticas mejoradas
         function mostrarEstadisticas() {
             const mesActual = new Date().getMonth();
             const añoActual = new Date().getFullYear();
             
+            // Calcular métricas principales
             const reservasMesActual = reservas.filter(r => {
                 const fecha = new Date(r.fechaEntrada);
                 return fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual;
             });
             
-            const ingresos = reservasMesActual.reduce((total, r) => total + parseInt(r.precio || 0), 0);
-            document.getElementById('ingresosMes').textContent = `$${ingresos.toLocaleString()}`;
+            const ingresosTotales = reservasMesActual.reduce((total, r) => {
+                const noches = calcularNoches(r.fechaEntrada, r.fechaSalida);
+                return total + (noches * (parseInt(r.precio || 0)));
+            }, 0);
             
             const diasDelMes = new Date(añoActual, mesActual + 1, 0).getDate();
-            const ocupacion = reservasMesActual.length > 0 ? Math.round((reservasMesActual.length / diasDelMes) * 100) : 0;
+            const reservasActivasMes = reservasMesActual.filter(esReservaActiva).length;
+            const ocupacion = reservasMesActual.length > 0 ? Math.round((reservasActivasMes / (diasDelMes * 5)) * 100) : 0;
+            
+            const promedioNoche = reservasMesActual.length > 0 ? 
+                Math.round(reservasMesActual.reduce((sum, r) => sum + parseInt(r.precio || 0), 0) / reservasMesActual.length) : 0;
+            
+            // Actualizar cards principales
+            document.getElementById('ingresosMes').textContent = `$${ingresosTotales.toLocaleString()}`;
             document.getElementById('ocupacionPromedio').textContent = `${ocupacion}%`;
-            
             document.getElementById('totalReservas').textContent = reservas.length;
+            document.getElementById('promedioNoche').textContent = `$${promedioNoche.toLocaleString()}`;
             
-            // Estado del respaldo
+            // Generar análisis detallado
+            generarAnalisisDetallado();
+            
+            // Estado del respaldo mejorado
+            actualizarEstadoRespaldo();
+        }
+
+        function generarAnalisisDetallado() {
+            // Top habitaciones por reservas
+            const topHabitaciones = {};
+            reservas.forEach(r => {
+                topHabitaciones[r.habitacion] = (topHabitaciones[r.habitacion] || 0) + 1;
+            });
+            
+            const topHabContainer = document.getElementById('topHabitaciones');
+            topHabContainer.innerHTML = '';
+            
+            Object.entries(topHabitaciones)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 3)
+                .forEach(([habNum, count]) => {
+                    const hab = habitacionesConfig[habNum];
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center justify-between p-2 rounded';
+                    item.style.background = 'var(--bg-secondary)';
+                    item.innerHTML = `
+                        <div class="flex items-center">
+                            <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: ${hab.color}"></span>
+                            <span class="text-sm">${hab.nombre}</span>
+                        </div>
+                        <span class="font-bold text-sm">${count}</span>
+                    `;
+                    topHabContainer.appendChild(item);
+                });
+            
+            // Estadías promedio
+            const estadiasContainer = document.getElementById('estadiasPromedio');
+            estadiasContainer.innerHTML = '';
+            
+            const estadias = reservas.map(r => calcularNoches(r.fechaEntrada, r.fechaSalida));
+            const promedioEstadia = estadias.length > 0 ? (estadias.reduce((a, b) => a + b, 0) / estadias.length).toFixed(1) : 0;
+            const estadiaMax = estadias.length > 0 ? Math.max(...estadias) : 0;
+            const estadiaMin = estadias.length > 0 ? Math.min(...estadias) : 0;
+            
+            estadiasContainer.innerHTML = `
+                <div class="space-y-1 text-sm">
+                    <div class="flex justify-between">
+                        <span style="color: var(--text-secondary);">Promedio:</span>
+                        <span style="color: var(--text-primary);" class="font-bold">${promedioEstadia} noches</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span style="color: var(--text-secondary);">Máximo:</span>
+                        <span style="color: var(--text-primary);">${estadiaMax} noches</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span style="color: var(--text-secondary);">Mínimo:</span>
+                        <span style="color: var(--text-primary);">${estadiaMin} noches</span>
+                    </div>
+                </div>
+            `;
+            
+            // Tendencias
+            const tendenciasContainer = document.getElementById('tendencias');
+            const hoy = new Date();
+            const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+            
+            const reservasMesAnterior = reservas.filter(r => {
+                const fecha = new Date(r.fechaEntrada);
+                return fecha.getMonth() === mesAnterior.getMonth() && fecha.getFullYear() === mesAnterior.getFullYear();
+            });
+            
+            const reservasMesActual = reservas.filter(r => {
+                const fecha = new Date(r.fechaEntrada);
+                return fecha.getMonth() === hoy.getMonth() && fecha.getFullYear() === hoy.getFullYear();
+            });
+            
+            const cambioReservas = reservasMesAnterior.length > 0 ? 
+                ((reservasMesActual.length - reservasMesAnterior.length) / reservasMesAnterior.length * 100).toFixed(1) : 0;
+            
+            const iconoCambio = cambioReservas > 0 ? '📈' : cambioReservas < 0 ? '📉' : '➡️';
+            const colorCambio = cambioReservas > 0 ? 'text-green-600' : cambioReservas < 0 ? 'text-red-600' : 'text-gray-600';
+            
+            tendenciasContainer.innerHTML = `
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span style="color: var(--text-secondary);">vs Mes anterior:</span>
+                        <span class="${colorCambio} font-bold">${iconoCambio} ${Math.abs(cambioReservas)}%</span>
+                    </div>
+                    <div class="text-xs" style="color: var(--text-secondary);">
+                        ${reservasMesActual.length} vs ${reservasMesAnterior.length} reservas
+                    </div>
+                </div>
+            `;
+        }
+
+        function actualizarEstadoRespaldo() {
             const ultimoRespaldo = localStorage.getItem('ultimoRespaldo');
             document.getElementById('ultimoRespaldo').textContent = ultimoRespaldo || 'Nunca';
             document.getElementById('estadoRespaldo').textContent = respaldoAutomaticoActivo ? 'Activo' : 'Inactivo';
-            document.getElementById('estadoRespaldo').className = respaldoAutomaticoActivo ? 'text-lg font-semibold text-green-600' : 'text-lg font-semibold text-red-600';
+            document.getElementById('estadoRespaldo').style.color = respaldoAutomaticoActivo ? '#059669' : '#dc2626';
+            
+            // Actualizar historial de respaldos
+            const historialContainer = document.getElementById('historialRespaldos');
+            historialContainer.innerHTML = '';
+            
+            if (respaldosHistorial.length === 0) {
+                historialContainer.innerHTML = '<p class="text-sm" style="color: var(--text-secondary);">No hay respaldos anteriores</p>';
+                return;
+            }
+            
+            respaldosHistorial.slice(0, 5).forEach(respaldo => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center text-xs p-2 rounded';
+                item.style.background = 'var(--bg-primary)';
+                item.innerHTML = `
+                    <span style="color: var(--text-primary);">${new Date(respaldo.fecha).toLocaleDateString('es-ES', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}</span>
+                    <span style="color: var(--text-secondary);">${respaldo.tipo}</span>
+                `;
+                historialContainer.appendChild(item);
+            });
         }
 
-        // Funciones de respaldo y exportación
+        function generarGraficos() {
+            // Gráfico de ingresos mensuales
+            const ctxIngresos = document.getElementById('chartIngresos');
+            if (ctxIngresos) {
+                const mesesData = [];
+                const ingresosData = [];
+                
+                // Últimos 6 meses
+                for (let i = 5; i >= 0; i--) {
+                    const fecha = new Date();
+                    fecha.setMonth(fecha.getMonth() - i);
+                    
+                    const reservasMes = reservas.filter(r => {
+                        const fechaReserva = new Date(r.fechaEntrada);
+                        return fechaReserva.getMonth() === fecha.getMonth() && 
+                               fechaReserva.getFullYear() === fecha.getFullYear();
+                    });
+                    
+                    const ingresosMes = reservasMes.reduce((total, r) => {
+                        const noches = calcularNoches(r.fechaEntrada, r.fechaSalida);
+                        return total + (noches * (parseInt(r.precio || 0)));
+                    }, 0);
+                    
+                    mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }));
+                    ingresosData.push(ingresosMes);
+                }
+                
+                new Chart(ctxIngresos, {
+                    type: 'line',
+                    data: {
+                        labels: mesesData,
+                        datasets: [{
+                            label: 'Ingresos ($)',
+                            data: ingresosData,
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Gráfico de ocupación por habitación
+            const ctxOcupacion = document.getElementById('chartOcupacion');
+            if (ctxOcupacion) {
+                const ocupacionData = [];
+                const coloresData = [];
+                const habitacionesLabels = [];
+                
+                Object.keys(habitacionesConfig).forEach(numHab => {
+                    const hab = habitacionesConfig[numHab];
+                    const reservasHab = reservas.filter(r => r.habitacion == numHab);
+                    
+                    habitacionesLabels.push(hab.nombre);
+                    ocupacionData.push(reservasHab.length);
+                    coloresData.push(hab.color);
+                });
+                
+                new Chart(ctxOcupacion, {
+                    type: 'doughnut',
+                    data: {
+                        labels: habitacionesLabels,
+                        datasets: [{
+                            data: ocupacionData,
+                            backgroundColor: coloresData,
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Funciones de respaldo y exportación mejoradas
         function exportarDatos() {
             const datos = {
                 reservas: reservas,
+                historialChecks: historialChecks,
+                respaldosHistorial: respaldosHistorial,
+                configuracion: {
+                    habitaciones: habitacionesConfig,
+                    tema: tema,
+                    respaldoAutomatico: respaldoAutomaticoActivo
+                },
                 fechaExportacion: new Date().toISOString(),
-                version: '1.0'
+                version: '2.0'
             };
             
             const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
+            const fechaString = new Date().toISOString().split('T')[0];
             a.href = url;
-            a.download = `hostal_plaza_lebu_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `hostal_plaza_lebu_respaldo_${fechaString}.json`;
             a.click();
             window.URL.revokeObjectURL(url);
             
-            // Actualizar último respaldo
-            localStorage.setItem('ultimoRespaldo', new Date().toLocaleString());
+            // Actualizar historial de respaldos
+            const nuevoRespaldo = {
+                fecha: new Date().toISOString(),
+                tipo: 'Manual',
+                reservas: reservas.length
+            };
+            
+            respaldosHistorial.unshift(nuevoRespaldo);
+            if (respaldosHistorial.length > 20) {
+                respaldosHistorial = respaldosHistorial.slice(0, 20);
+            }
+            
+            // Guardar en localStorage
+            localStorage.setItem('ultimoRespaldo', new Date().toLocaleString('es-ES'));
+            localStorage.setItem('respaldosHistorial', JSON.stringify(respaldosHistorial));
+            
+            showToast('✅ Respaldo creado exitosamente', 'success');
+            
+            if (paginaActiva === 'estadisticas') {
+                actualizarEstadoRespaldo();
+            }
         }
 
         function importarDatos() {
@@ -549,21 +2246,56 @@
                     
                     // Verificar formato
                     if (datos.reservas && Array.isArray(datos.reservas)) {
-                        if (confirm(`¿Importar ${datos.reservas.length} reservas? Esto reemplazará los datos actuales.`)) {
+                        const mensaje = `¿Importar datos del respaldo?
+                        
+📊 Reservas: ${datos.reservas.length}
+📅 Fecha: ${new Date(datos.fechaExportacion).toLocaleDateString('es-ES')}
+⚠️ Esto reemplazará todos los datos actuales.`;
+                        
+                        if (confirm(mensaje)) {
                             reservas = datos.reservas;
+                            
+                            // Importar datos adicionales si existen
+                            if (datos.historialChecks) {
+                                historialChecks = datos.historialChecks;
+                                localStorage.setItem('historialChecks', JSON.stringify(historialChecks));
+                            }
+                            
+                            if (datos.respaldosHistorial) {
+                                respaldosHistorial = datos.respaldosHistorial;
+                                localStorage.setItem('respaldosHistorial', JSON.stringify(respaldosHistorial));
+                            }
+                            
+                            if (datos.configuracion && datos.configuracion.tema) {
+                                tema = datos.configuracion.tema;
+                                document.documentElement.setAttribute('data-theme', tema);
+                                localStorage.setItem('tema', tema);
+                            }
+                            
+                            // Guardar reservas
                             localStorage.setItem('hostalReservas', JSON.stringify(reservas));
-                            alert('✅ Datos importados exitosamente');
-                            generarCalendario();
-                            mostrarListaReservas();
+                            
+                            showToast('✅ Datos importados exitosamente', 'success');
+                            
+                            // Actualizar todas las vistas
+                            if (paginaActiva === 'dashboard') cargarDashboard();
+                            if (paginaActiva === 'calendario') generarCalendario();
+                            if (paginaActiva === 'lista') mostrarListaReservas();
+                            if (paginaActiva === 'disponibilidad') mostrarDisponibilidad();
+                            if (paginaActiva === 'estadisticas') mostrarEstadisticas();
                         }
                     } else {
-                        alert('❌ Formato de archivo no compatible');
+                        showToast('❌ Formato de archivo no compatible', 'error');
                     }
                 } catch (error) {
-                    alert('❌ Error al leer el archivo');
+                    console.error('Error al procesar importación:', error);
+                    showToast('❌ Error al leer el archivo', 'error');
                 }
             };
             reader.readAsText(file);
+            
+            // Limpiar el input
+            event.target.value = '';
         }
 
         function crearRespaldoManual() {
@@ -575,52 +2307,78 @@
             localStorage.setItem('respaldoAutomatico', respaldoAutomaticoActivo.toString());
             
             if (respaldoAutomaticoActivo) {
-                alert('✅ Respaldo automático activado. Se ejecutará diariamente a las 23:59.');
-                // Configurar respaldo diario
+                showToast('✅ Respaldo automático activado', 'success');
                 configurarRespaldoAutomatico();
             } else {
-                alert('❌ Respaldo automático desactivado');
+                showToast('❌ Respaldo automático desactivado', 'info');
             }
-            mostrarEstadisticas();
+            
+            if (paginaActiva === 'estadisticas') {
+                actualizarEstadoRespaldo();
+            }
         }
 
         function configurarRespaldoAutomatico() {
-            const ahora = new Date();
-            const proximoRespaldo = new Date();
-            proximoRespaldo.setHours(23, 59, 0, 0);
-            
-            if (ahora > proximoRespaldo) {
-                proximoRespaldo.setDate(proximoRespaldo.getDate() + 1);
+            // Crear respaldo automático cada 24 horas
+            if (respaldoAutomaticoActivo) {
+                setTimeout(() => {
+                    if (respaldoAutomaticoActivo) {
+                        const nuevoRespaldo = {
+                            fecha: new Date().toISOString(),
+                            tipo: 'Automático',
+                            reservas: reservas.length
+                        };
+                        
+                        respaldosHistorial.unshift(nuevoRespaldo);
+                        localStorage.setItem('respaldosHistorial', JSON.stringify(respaldosHistorial));
+                        localStorage.setItem('ultimoRespaldo', new Date().toLocaleString('es-ES'));
+                        
+                        // Programar siguiente respaldo
+                        configurarRespaldoAutomatico();
+                    }
+                }, 24 * 60 * 60 * 1000); // 24 horas
             }
-            
-            const tiempoHastaRespaldo = proximoRespaldo - ahora;
-            
-            setTimeout(() => {
-                if (respaldoAutomaticoActivo) {
-                    exportarDatos();
-                    // Programar el siguiente respaldo en 24 horas
-                    setInterval(() => {
-                        if (respaldoAutomaticoActivo) {
-                            exportarDatos();
-                        }
-                    }, 24 * 60 * 60 * 1000);
-                }
-            }, tiempoHastaRespaldo);
         }
 
-        // Formulario de nueva reserva
+        // Formulario de nueva reserva mejorado
         document.getElementById('formReserva').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            const fechaEntrada = document.getElementById('fechaEntrada').value;
+            const fechaSalida = document.getElementById('fechaSalida').value;
+            const habitacion = parseInt(document.getElementById('habitacion').value);
+            const nombreHuesped = document.getElementById('nombreHuesped').value.trim();
+            
+            // Validaciones
+            if (!nombreHuesped) {
+                showToast('❌ Por favor ingresa el nombre del huésped', 'error');
+                return;
+            }
+            
+            if (fechaEntrada >= fechaSalida) {
+                showToast('❌ La fecha de salida debe ser posterior a la de entrada', 'error');
+                return;
+            }
+            
+            // Verificar disponibilidad
+            if (!verificarDisponibilidad(habitacion, fechaEntrada, fechaSalida)) {
+                showToast('❌ La habitación no está disponible en estas fechas', 'error');
+                return;
+            }
+            
+            // Crear reserva
             const reserva = {
-                nombreHuesped: document.getElementById('nombreHuesped').value,
-                fechaEntrada: document.getElementById('fechaEntrada').value,
-                fechaSalida: document.getElementById('fechaSalida').value,
-                habitacion: parseInt(document.getElementById('habitacion').value),
+                id: Date.now().toString(),
+                nombreHuesped: nombreHuesped,
+                fechaEntrada: fechaEntrada,
+                fechaSalida: fechaSalida,
+                habitacion: habitacion,
                 numPersonas: parseInt(document.getElementById('numPersonas').value),
                 precio: parseInt(document.getElementById('precio').value),
                 notas: document.getElementById('notas').value,
-                fechaCreacion: new Date().toISOString()
+                fechaCreacion: new Date().toISOString(),
+                checkedIn: false,
+                checkedOut: false
             };
             
             reservas.push(reserva);
@@ -628,47 +2386,122 @@
             
             closeModal('nuevaReserva');
             this.reset();
-            generarCalendario();
-            alert('✅ Reserva guardada exitosamente');
+            
+            const hab = habitacionesConfig[habitacion];
+            const noches = calcularNoches(fechaEntrada, fechaSalida);
+            showToast(`✅ Reserva creada: ${nombreHuesped} en ${hab.nombre} por ${noches} noche${noches !== 1 ? 's' : ''}`, 'success');
+            
+            // Actualizar vistas
+            if (paginaActiva === 'dashboard') cargarDashboard();
+            if (paginaActiva === 'calendario') generarCalendario();
+            if (paginaActiva === 'lista') mostrarListaReservas();
+            if (paginaActiva === 'disponibilidad') mostrarDisponibilidad();
         });
 
-        // Eliminar reserva
+        // Funciones de gestión de reservas
+        function editarReserva(index) {
+            closeModal('modalVerReserva');
+            showToast('Función de edición en desarrollo', 'info');
+            // TODO: Implementar modal de edición
+        }
+
         function eliminarReserva(index) {
-            if (confirm('¿Eliminar esta reserva?')) {
+            const reserva = reservas[index];
+            const hab = habitacionesConfig[reserva.habitacion];
+            
+            if (confirm(`¿Eliminar la reserva de ${reserva.nombreHuesped} en ${hab.nombre}?`)) {
                 reservas.splice(index, 1);
                 localStorage.setItem('hostalReservas', JSON.stringify(reservas));
-                mostrarListaReservas();
-                generarCalendario();
+                
+                showToast(`✅ Reserva de ${reserva.nombreHuesped} eliminada`, 'success');
+                
+                // Actualizar vistas
+                closeModal('modalVerReserva');
+                if (paginaActiva === 'dashboard') cargarDashboard();
+                if (paginaActiva === 'calendario') generarCalendario();
+                if (paginaActiva === 'lista') mostrarListaReservas();
+                if (paginaActiva === 'disponibilidad') mostrarDisponibilidad();
             }
         }
 
-        // Filtrar reservas
-        function filtrarReservas() {
-            const busqueda = document.getElementById('buscarReserva').value.toLowerCase();
-            mostrarListaReservas();
+        // Eventos del formulario
+        document.getElementById('fechaEntrada').addEventListener('change', calcularPrecioTotal);
+        document.getElementById('fechaSalida').addEventListener('change', calcularPrecioTotal);
+
+        // Inicialización del sistema
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aplicar tema guardado
+            document.documentElement.setAttribute('data-theme', tema);
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) {
+                themeIcon.className = tema === 'light' ? 'fas fa-moon text-lg' : 'fas fa-sun text-lg';
+            }
             
-            if (busqueda) {
-                const items = document.querySelectorAll('#listaReservas > div');
-                items.forEach(item => {
-                    const texto = item.textContent.toLowerCase();
-                    item.style.display = texto.includes(busqueda) ? 'block' : 'none';
+            // Configurar fechas mínimas
+            const hoy = new Date().toISOString().split('T')[0];
+            const mañana = new Date();
+            mañana.setDate(mañana.getDate() + 1);
+            const mañanaStr = mañana.toISOString().split('T')[0];
+            
+            const fechaEntradaInput = document.getElementById('fechaEntrada');
+            const fechaSalidaInput = document.getElementById('fechaSalida');
+            
+            if (fechaEntradaInput && fechaSalidaInput) {
+                fechaEntradaInput.min = hoy;
+                fechaSalidaInput.min = mañanaStr;
+                
+                // Actualizar fecha mínima de salida cuando cambia entrada
+                fechaEntradaInput.addEventListener('change', function() {
+                    const fechaEntrada = new Date(this.value);
+                    fechaEntrada.setDate(fechaEntrada.getDate() + 1);
+                    fechaSalidaInput.min = fechaEntrada.toISOString().split('T')[0];
+                    calcularPrecioTotal();
                 });
             }
-        }
-
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', function() {
-            generarCalendario();
             
-            // Configurar fecha mínima
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('fechaEntrada').min = hoy;
-            document.getElementById('fechaSalida').min = hoy;
+            // Migrar reservas antiguas (agregar IDs si no las tienen)
+            let migracionNecesaria = false;
+            reservas.forEach((reserva, index) => {
+                if (!reserva.id) {
+                    reserva.id = Date.now().toString() + index;
+                    migracionNecesaria = true;
+                }
+                if (reserva.checkedIn === undefined) {
+                    reserva.checkedIn = false;
+                    migracionNecesaria = true;
+                }
+                if (reserva.checkedOut === undefined) {
+                    reserva.checkedOut = false;
+                    migracionNecesaria = true;
+                }
+            });
+            
+            if (migracionNecesaria) {
+                localStorage.setItem('hostalReservas', JSON.stringify(reservas));
+                console.log('✅ Migración de datos completada');
+            }
+            
+            // Cargar dashboard inicial
+            cargarDashboard();
             
             // Configurar respaldo automático si está activo
             if (respaldoAutomaticoActivo) {
                 configurarRespaldoAutomatico();
             }
+            
+            // Mostrar mensaje de bienvenida
+            setTimeout(() => {
+                showToast('¡Bienvenido al Sistema de Gestión Hostal Plaza Lebu! 🏨', 'success', 4000);
+            }, 1000);
+            
+            console.log(`
+🏨 HOSTAL PLAZA LEBU - Sistema de Gestión v2.0
+📊 Reservas cargadas: ${reservas.length}
+📅 Historial de checks: ${historialChecks.length}
+💾 Respaldos: ${respaldosHistorial.length}
+🎨 Tema: ${tema}
+🔄 Respaldo automático: ${respaldoAutomaticoActivo ? 'Activo' : 'Inactivo'}
+            `);
         });
 
         // Cerrar modales al hacer clic fuera
@@ -680,6 +2513,42 @@
                 }
             });
         }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Escape para cerrar modales
+            if (e.key === 'Escape') {
+                const modalActivo = document.querySelector('.modal.active');
+                if (modalActivo) {
+                    modalActivo.classList.remove('active');
+                }
+            }
+            
+            // Ctrl/Cmd + N para nueva reserva
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                openModal('nuevaReserva');
+            }
+            
+            // Ctrl/Cmd + E para exportar
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                exportarDatos();
+            }
+        });
+
+        // Eventos de ventana
+        window.addEventListener('beforeunload', function(e) {
+            // Crear respaldo automático antes de cerrar si hay cambios recientes
+            const ultimoRespaldo = localStorage.getItem('ultimoRespaldo');
+            if (!ultimoRespaldo || (Date.now() - new Date(ultimoRespaldo).getTime()) > 24 * 60 * 60 * 1000) {
+                localStorage.setItem('ultimoRespaldo', new Date().toLocaleString('es-ES'));
+            }
+        });
+
+        // Detectar cambios de conectividad
+        window.addEventListener('online', () => showToast('✅ Conexión restaurada', 'success', 2000));
+        window.addEventListener('offline', () => showToast('⚠️ Sin conexión - Datos guardados localmente', 'warning', 3000));
     </script>
 </body>
 </html>
