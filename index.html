@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=10.0, minimum-scale=0.5, viewport-fit=cover">
     <title>HOSTAL PLAZA LEBU</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
@@ -43,19 +43,21 @@
         }
         
         .calendar-day {
-            min-height: 110px;
-            height: 110px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 6px 4px;
+            min-height: 150px;
+            height: 150px;
+            border: 3px solid var(--border-color);
+            border-radius: 15px;
+            padding: 10px 8px;
             background: var(--bg-primary);
-            font-size: 12px;
+            font-size: 18px;
+            font-weight: 800;
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
             overflow: visible;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         .calendar-day:hover {
@@ -72,20 +74,25 @@
         }
         
         .reserva-item {
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 900;
             color: white;
-            padding: 5px 4px;
-            margin: 2px 0;
-            border-radius: 6px;
+            padding: 10px 8px;
+            margin: 4px 0;
+            border-radius: 10px;
             text-align: center;
             line-height: 1.3;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 3px solid rgba(255,255,255,0.5);
+            min-height: 55px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .reserva-item:hover {
@@ -221,28 +228,61 @@
 
         @media (max-width: 768px) {
             .calendar-day {
-                min-height: 95px;
-                height: 95px;
-                font-size: 11px;
-                padding: 5px 3px;
+                min-height: 120px;
+                height: 120px;
+                font-size: 16px;
+                font-weight: 800;
+                padding: 8px 6px;
+                border-width: 3px;
             }
             .reserva-item {
-                font-size: 11px;
-                padding: 3px 2px;
-                margin: 1px 0;
+                font-size: 18px;
+                font-weight: 900;
+                padding: 8px 6px;
+                margin: 3px 0;
+                min-height: 50px;
+                text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);
+                border-width: 3px;
             }
         }
 
         @media (max-width: 640px) {
             .calendar-day {
-                min-height: 85px;
-                height: 85px;
-                font-size: 10px;
-                padding: 4px 2px;
+                min-height: 110px;
+                height: 110px;
+                font-size: 15px;
+                font-weight: 800;
+                padding: 6px 4px;
+                border-width: 2px;
             }
             .reserva-item {
-                font-size: 10px;
-                padding: 2px 1px;
+                font-size: 16px;
+                font-weight: 900;
+                padding: 6px 4px;
+                margin: 2px 0;
+                min-height: 45px;
+                text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);
+                border-width: 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-day {
+                min-height: 100px;
+                height: 100px;
+                font-size: 14px;
+                font-weight: 800;
+                padding: 5px 3px;
+                border-width: 2px;
+            }
+            .reserva-item {
+                font-size: 15px;
+                font-weight: 900;
+                padding: 5px 3px;
+                margin: 2px 0;
+                min-height: 40px;
+                text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);
+                border-width: 2px;
             }
         }
     </style>
@@ -683,7 +723,7 @@
                     diaElement.classList.add('today');
                 }
                 
-                diaElement.innerHTML = `<div class="font-bold text-center mb-1">${dia}</div>`;
+                diaElement.innerHTML = `<div class="font-black text-center mb-2 text-xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3); color: var(--text-primary);">${dia}</div>`;
                 
                 // Buscar reservas activas para este día
                 const reservasDelDia = reservas.filter(r => {
@@ -711,8 +751,8 @@
                     const iniciales = reserva.nombreHuesped.split(' ').map(n => n[0]).join('').substring(0, 2);
                     
                     reservaDiv.innerHTML = `
-                        <div style="font-size: 13px; font-weight: 900; line-height: 1.1; text-shadow: 2px 2px 3px rgba(0,0,0,0.7);">${nombreCorto.length > 7 ? iniciales : nombreCorto}</div>
-                        <div style="font-size: 11px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">H${reserva.habitacion}</div>
+                        <div style="font-size: 18px; font-weight: 900; line-height: 1.2; text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);">${nombreCorto.length > 7 ? iniciales : nombreCorto}</div>
+                        <div style="font-size: 16px; font-weight: 900; text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);">H${reserva.habitacion}</div>
                     `;
                     
                     diaElement.appendChild(reservaDiv);
