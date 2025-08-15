@@ -236,13 +236,13 @@
                 border-width: 3px;
             }
             .reserva-item {
-                font-size: 18px;
-                font-weight: 900;
-                padding: 8px 6px;
-                margin: 3px 0;
-                min-height: 50px;
-                text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);
-                border-width: 3px;
+                font-size: 10px;
+                font-weight: 800;
+                padding: 3px 2px;
+                margin: 2px 0;
+                min-height: 32px;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,1);
+                border-width: 2px;
             }
         }
 
@@ -256,12 +256,12 @@
                 border-width: 2px;
             }
             .reserva-item {
-                font-size: 16px;
-                font-weight: 900;
-                padding: 6px 4px;
-                margin: 2px 0;
-                min-height: 45px;
-                text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);
+                font-size: 9px;
+                font-weight: 800;
+                padding: 2px 1px;
+                margin: 1px 0;
+                min-height: 30px;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,1);
                 border-width: 2px;
             }
         }
@@ -276,13 +276,14 @@
                 border-width: 2px;
             }
             .reserva-item {
-                font-size: 15px;
-                font-weight: 900;
-                padding: 5px 3px;
-                margin: 2px 0;
-                min-height: 40px;
-                text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);
+                font-size: 8px;
+                font-weight: 800;
+                padding: 2px 1px;
+                margin: 1px 0;
+                min-height: 28px;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,1);
                 border-width: 2px;
+                line-height: 0.9;
             }
         }
     </style>
@@ -747,12 +748,22 @@
                         abrirEditarReserva(reserva);
                     };
                     
-                    const nombreCorto = reserva.nombreHuesped.split(' ')[0];
-                    const iniciales = reserva.nombreHuesped.split(' ').map(n => n[0]).join('').substring(0, 2);
+                    // Mostrar nombre completo si es corto, sino usar nombre y apellido abreviado
+                    let nombreMostrar = reserva.nombreHuesped;
+                    if (nombreMostrar.length > 12) {
+                        const partes = nombreMostrar.split(' ');
+                        if (partes.length > 1) {
+                            // Usar primer nombre + inicial del apellido
+                            nombreMostrar = partes[0] + ' ' + partes[partes.length - 1].substring(0, 1) + '.';
+                        } else {
+                            // Si es un solo nombre muy largo, cortarlo
+                            nombreMostrar = nombreMostrar.substring(0, 9) + '...';
+                        }
+                    }
                     
                     reservaDiv.innerHTML = `
-                        <div style="font-size: 18px; font-weight: 900; line-height: 1.2; text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);">${nombreCorto.length > 7 ? iniciales : nombreCorto}</div>
-                        <div style="font-size: 16px; font-weight: 900; text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,0.8);">H${reserva.habitacion}</div>
+                        <div style="font-size: 10px; font-weight: 800; line-height: 1.1; text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,1); margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nombreMostrar}</div>
+                        <div style="font-size: 9px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 0px rgba(0,0,0,1);">H${reserva.habitacion}</div>
                     `;
                     
                     diaElement.appendChild(reservaDiv);
