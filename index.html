@@ -387,7 +387,29 @@
                     <button onclick="cambiarMes(-1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <h3 id="mesActual" class="text-2xl font-bold" style="color: var(--text-primary);"></h3>
+                    <div class="flex items-center space-x-3">
+                        <select id="navegacionMes" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="0">Enero</option>
+                            <option value="1">Febrero</option>
+                            <option value="2">Marzo</option>
+                            <option value="3">Abril</option>
+                            <option value="4">Mayo</option>
+                            <option value="5">Junio</option>
+                            <option value="6">Julio</option>
+                            <option value="7">Agosto</option>
+                            <option value="8">Septiembre</option>
+                            <option value="9">Octubre</option>
+                            <option value="10">Noviembre</option>
+                            <option value="11">Diciembre</option>
+                        </select>
+                        <select id="navegacionAño" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                    </div>
                     <button onclick="cambiarMes(1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
                         <i class="fas fa-chevron-right"></i>
                     </button>
@@ -442,6 +464,14 @@
                         <option value="3">🟢 Habitación 3</option>
                         <option value="4">🟠 Habitación 4</option>
                         <option value="5">🟣 Habitación 5</option>
+                    </select>
+                    <select id="ordenarReservas" class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-48" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <option value="fecha_asc">📅 Por fecha (próximas primero)</option>
+                        <option value="fecha_desc">📅 Por fecha (recientes primero)</option>
+                        <option value="nombre_asc">📝 Por nombre (A-Z)</option>
+                        <option value="nombre_desc">📝 Por nombre (Z-A)</option>
+                        <option value="habitacion_asc">🏠 Por habitación (1-5)</option>
+                        <option value="precio_desc">💰 Por precio (mayor-menor)</option>
                     </select>
                 </div>
                 
@@ -754,6 +784,9 @@
                 return;
             }
             
+            // Actualizar selectores de navegación
+            actualizarNavegacionRapida();
+            
             container.innerHTML = '';
             
             const año = fechaActual.getFullYear();
@@ -972,8 +1005,32 @@
                 );
             }
             
-            // Ordenar por fecha de entrada
-            reservasFiltradas.sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
+            // Aplicar ordenamiento
+            const ordenSelector = document.getElementById('ordenarReservas');
+            const orden = ordenSelector ? ordenSelector.value : 'fecha_asc';
+            
+            switch(orden) {
+                case 'fecha_asc':
+                    reservasFiltradas.sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
+                    break;
+                case 'fecha_desc':
+                    reservasFiltradas.sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada));
+                    break;
+                case 'nombre_asc':
+                    reservasFiltradas.sort((a, b) => a.nombreHuesped.localeCompare(b.nombreHuesped));
+                    break;
+                case 'nombre_desc':
+                    reservasFiltradas.sort((a, b) => b.nombreHuesped.localeCompare(a.nombreHuesped));
+                    break;
+                case 'habitacion_asc':
+                    reservasFiltradas.sort((a, b) => a.habitacion - b.habitacion);
+                    break;
+                case 'precio_desc':
+                    reservasFiltradas.sort((a, b) => b.precio - a.precio);
+                    break;
+                default:
+                    reservasFiltradas.sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
+            }
             
             // Limpiar container
             container.innerHTML = '';
@@ -987,6 +1044,16 @@
                 `;
                 return;
             }
+            
+            // Mostrar contador de resultados
+            const contadorDiv = document.createElement('div');
+            contadorDiv.className = 'mb-4 text-sm font-medium';
+            contadorDiv.style.color = 'var(--text-secondary)';
+            contadorDiv.innerHTML = `
+                <i class="fas fa-info-circle mr-1"></i>
+                Mostrando ${reservasFiltradas.length} de ${reservas.length} reservas
+            `;
+            container.appendChild(contadorDiv);
             
             // Generar cards de reservas
             reservasFiltradas.forEach(reserva => {
@@ -1144,11 +1211,40 @@
             input.click();
         }
 
-        // Event listeners para filtros y buscador
+        // Funciones de navegación rápida del calendario
+        function actualizarNavegacionRapida() {
+            const mesSelect = document.getElementById('navegacionMes');
+            const añoSelect = document.getElementById('navegacionAño');
+            
+            if (mesSelect) {
+                mesSelect.value = fechaActual.getMonth().toString();
+            }
+            if (añoSelect) {
+                añoSelect.value = fechaActual.getFullYear().toString();
+            }
+        }
+        
+        function navegacionRapida() {
+            const mesSelect = document.getElementById('navegacionMes');
+            const añoSelect = document.getElementById('navegacionAño');
+            
+            if (mesSelect && añoSelect) {
+                const nuevoMes = parseInt(mesSelect.value);
+                const nuevoAño = parseInt(añoSelect.value);
+                
+                fechaActual = new Date(nuevoAño, nuevoMes, 1);
+                generarCalendario();
+            }
+        }
+
+        // Event listeners para filtros, buscador y navegación
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const filtroHab = document.getElementById('filtroHabitacion');
                 const buscador = document.getElementById('buscadorReservas');
+                const ordenar = document.getElementById('ordenarReservas');
+                const mesSelect = document.getElementById('navegacionMes');
+                const añoSelect = document.getElementById('navegacionAño');
                 
                 if (filtroHab) {
                     filtroHab.addEventListener('change', generarListaReservas);
@@ -1162,6 +1258,18 @@
                             generarListaReservas();
                         }, 300);
                     });
+                }
+                
+                if (ordenar) {
+                    ordenar.addEventListener('change', generarListaReservas);
+                }
+                
+                if (mesSelect) {
+                    mesSelect.addEventListener('change', navegacionRapida);
+                }
+                
+                if (añoSelect) {
+                    añoSelect.addEventListener('change', navegacionRapida);
                 }
             }, 500);
         });
