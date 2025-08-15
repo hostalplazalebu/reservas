@@ -89,7 +89,7 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             border: 1px solid rgba(255,255,255,0.15);
-            min-height: 35px;
+            min-height: 25px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -241,7 +241,7 @@
                 font-weight: 500;
                 padding: 3px 2px;
                 margin: 2px 0;
-                min-height: 32px;
+                min-height: 24px;
                 text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
                 border-width: 1px;
             }
@@ -261,7 +261,7 @@
                 font-weight: 500;
                 padding: 2px 1px;
                 margin: 1px 0;
-                min-height: 30px;
+                min-height: 22px;
                 text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
                 border-width: 1px;
             }
@@ -281,7 +281,7 @@
                 font-weight: 500;
                 padding: 2px 1px;
                 margin: 1px 0;
-                min-height: 28px;
+                min-height: 20px;
                 text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
                 border-width: 1px;
                 line-height: 0.9;
@@ -763,8 +763,7 @@
                     }
                     
                     reservaDiv.innerHTML = `
-                        <div style="font-size: 10px; font-weight: 500; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nombreMostrar}</div>
-                        <div style="font-size: 9px; font-weight: 400; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); opacity: 0.9;">H${reserva.habitacion}</div>
+                        <div style="font-size: 10px; font-weight: 500; line-height: 1.2; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); padding: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;">${nombreMostrar} (H${reserva.habitacion})</div>
                     `;
                     
                     diaElement.appendChild(reservaDiv);
