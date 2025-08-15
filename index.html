@@ -2504,6 +2504,242 @@
             `);
         });
 
+        // Funciones de Check-in/Check-out
+        function realizarCheckInReserva(reservaId) {
+            const reserva = reservas.find(r => r.id === reservaId || reservas.indexOf(r) == reservaId);
+            if (!reserva) return;
+            
+            reserva.checkedIn = true;
+            reserva.fechaCheckIn = new Date().toISOString();
+            
+            historialChecks.push({
+                reservaId: reserva.id || reservas.indexOf(reserva),
+                tipo: 'checkin',
+                fecha: new Date().toISOString(),
+                huesped: reserva.nombreHuesped,
+                habitacion: reserva.habitacion
+            });
+            
+            guardarDatos();
+            showToast(`✅ Check-in realizado: ${reserva.nombreHuesped}`, 'success');
+            
+            if (paginaActiva === 'dashboard') cargarDashboard();
+            if (paginaActiva === 'disponibilidad') mostrarDisponibilidad();
+        }
+
+        function realizarCheckOutReserva(reservaId) {
+            const reserva = reservas.find(r => r.id === reservaId || reservas.indexOf(r) == reservaId);
+            if (!reserva) return;
+            
+            reserva.checkedOut = true;
+            reserva.fechaCheckOut = new Date().toISOString();
+            
+            historialChecks.push({
+                reservaId: reserva.id || reservas.indexOf(reserva),
+                tipo: 'checkout',
+                fecha: new Date().toISOString(),
+                huesped: reserva.nombreHuesped,
+                habitacion: reserva.habitacion
+            });
+            
+            guardarDatos();
+            showToast(`✅ Check-out realizado: ${reserva.nombreHuesped}`, 'success');
+            
+            if (paginaActiva === 'dashboard') cargarDashboard();
+            if (paginaActiva === 'disponibilidad') mostrarDisponibilidad();
+        }
+
+        // Funciones del formulario mejoradas
+        function calcularPrecioTotal() {
+            const fechaEntrada = document.getElementById('fechaEntrada').value;
+            const fechaSalida = document.getElementById('fechaSalida').value;
+            const precio = parseFloat(document.getElementById('precio').value) || 0;
+            
+            if (fechaEntrada && fechaSalida) {
+                const noches = calcularNoches(fechaEntrada, fechaSalida);
+                const total = noches * precio;
+                
+                document.getElementById('totalNoches').textContent = noches;
+                document.getElementById('precioTotal').textContent = total.toLocaleString();
+                
+                // Verificar disponibilidad
+                verificarDisponibilidad();
+            }
+        }
+
+        function verificarDisponibilidad() {
+            const habitacion = document.getElementById('habitacion').value;
+            const fechaEntrada = document.getElementById('fechaEntrada').value;
+            const fechaSalida = document.getElementById('fechaSalida').value;
+            const container = document.getElementById('disponibilidadHab');
+            
+            if (!habitacion || !fechaEntrada || !fechaSalida) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            const conflictos = reservas.filter(r => {
+                if (r.habitacion != habitacion) return false;
+                
+                const entradaExistente = new Date(r.fechaEntrada);
+                const salidaExistente = new Date(r.fechaSalida);
+                const nuevaEntrada = new Date(fechaEntrada);
+                const nuevaSalida = new Date(fechaSalida);
+                
+                // Verificar solapamiento
+                return (nuevaEntrada < salidaExistente && nuevaSalida > entradaExistente);
+            });
+            
+            if (conflictos.length > 0) {
+                container.innerHTML = '<span class="text-red-500 text-sm">⚠️ Habitación no disponible en estas fechas</span>';
+                document.getElementById('habitacion').style.borderColor = '#ef4444';
+            } else {
+                container.innerHTML = '<span class="text-green-500 text-sm">✅ Habitación disponible</span>';
+                document.getElementById('habitacion').style.borderColor = '#10b981';
+            }
+        }
+
+        function verHoy() {
+            fechaActual = new Date();
+            generarCalendario();
+        }
+
+        // Funciones de filtrado mejoradas
+        function filtrarPorEstado(estado) {
+            filtroActual = estado;
+            
+            // Actualizar botones
+            document.querySelectorAll('.filtro-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'bg-green-500', 'bg-gray-600');
+                btn.classList.add('bg-gray-400');
+            });
+            
+            const btnActivo = document.querySelector(`[data-filtro="${estado}"]`);
+            if (btnActivo) {
+                btnActivo.classList.remove('bg-gray-400');
+                btnActivo.classList.add(estado === 'todas' ? 'bg-gray-600' : estado === 'activas' ? 'bg-green-500' : 'bg-blue-500');
+            }
+            
+            mostrarListaReservas();
+        }
+
+        // Funciones de modales
+        function verDetallesReserva(reserva) {
+            const modal = document.getElementById('modalVerReserva');
+            const contenido = document.getElementById('contenidoVerReserva');
+            const hab = habitacionesConfig[reserva.habitacion];
+            
+            const noches = calcularNoches(reserva.fechaEntrada, reserva.fechaSalida);
+            const total = noches * (reserva.precio || 0);
+            
+            contenido.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center mb-4">
+                        <span class="inline-block w-6 h-6 rounded-full mr-3" style="background: ${hab.color}"></span>
+                        <h3 class="text-xl font-bold" style="color: var(--text-primary);">${reserva.nombreHuesped}</h3>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-sm font-medium" style="color: var(--text-secondary);">Habitación</label>
+                                <p class="font-semibold" style="color: var(--text-primary);">${hab.emoji} ${hab.nombre}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium" style="color: var(--text-secondary);">Personas</label>
+                                <p class="font-semibold" style="color: var(--text-primary);">${reserva.numPersonas}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium" style="color: var(--text-secondary);">Estado</label>
+                                <p class="font-semibold">
+                                    ${esReservaActiva(reserva) ? 
+                                        '<span class="status-badge status-occupied">Activa</span>' : 
+                                        '<span class="status-badge status-available">Finalizada</span>'
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-sm font-medium" style="color: var(--text-secondary);">Fechas</label>
+                                <p class="font-semibold" style="color: var(--text-primary);">
+                                    ${formatearFecha(reserva.fechaEntrada, 'corta')} - ${formatearFecha(reserva.fechaSalida, 'corta')}
+                                </p>
+                                <p class="text-sm" style="color: var(--text-secondary);">${noches} noche${noches !== 1 ? 's' : ''}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium" style="color: var(--text-secondary);">Precio Total</label>
+                                <p class="text-xl font-bold text-green-600">$${total.toLocaleString()}</p>
+                                <p class="text-sm" style="color: var(--text-secondary);">$${(reserva.precio || 0).toLocaleString()} por noche</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${reserva.notas ? `
+                        <div>
+                            <label class="text-sm font-medium" style="color: var(--text-secondary);">Notas</label>
+                            <p class="mt-1 p-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-primary);">${reserva.notas}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="grid grid-cols-2 gap-4 pt-4">
+                        <div>
+                            <label class="text-sm font-medium" style="color: var(--text-secondary);">Check-in</label>
+                            <p class="font-semibold" style="color: var(--text-primary);">
+                                ${reserva.checkedIn ? '✅ Realizado' : '⏳ Pendiente'}
+                            </p>
+                            ${reserva.fechaCheckIn ? `<p class="text-xs" style="color: var(--text-secondary);">${new Date(reserva.fechaCheckIn).toLocaleString('es-ES')}</p>` : ''}
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium" style="color: var(--text-secondary);">Check-out</label>
+                            <p class="font-semibold" style="color: var(--text-primary);">
+                                ${reserva.checkedOut ? '✅ Realizado' : '⏳ Pendiente'}
+                            </p>
+                            ${reserva.fechaCheckOut ? `<p class="text-xs" style="color: var(--text-secondary);">${new Date(reserva.fechaCheckOut).toLocaleString('es-ES')}</p>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3 pt-6">
+                        ${esHoy(reserva.fechaEntrada) && !reserva.checkedIn ? 
+                            `<button onclick="realizarCheckInReserva('${reserva.id || reservas.indexOf(reserva)}'); closeModal('modalVerReserva')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition-all duration-300">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Check-in
+                            </button>` : ''
+                        }
+                        ${esHoy(reserva.fechaSalida) && !reserva.checkedOut ? 
+                            `<button onclick="realizarCheckOutReserva('${reserva.id || reservas.indexOf(reserva)}'); closeModal('modalVerReserva')" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-all duration-300">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Check-out
+                            </button>` : ''
+                        }
+                        <button onclick="closeModal('modalVerReserva')" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg transition-all duration-300">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        // Funciones auxiliares de datos
+        function guardarDatos() {
+            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
+            localStorage.setItem('historialChecks', JSON.stringify(historialChecks));
+            localStorage.setItem('respaldosHistorial', JSON.stringify(respaldosHistorial));
+        }
+
+        // Event listeners para el formulario
+        document.getElementById('fechaEntrada').addEventListener('change', calcularPrecioTotal);
+        document.getElementById('fechaSalida').addEventListener('change', calcularPrecioTotal);
+        document.getElementById('precio').addEventListener('input', calcularPrecioTotal);
+        document.getElementById('habitacion').addEventListener('change', function() {
+            const habitacion = this.value;
+            if (habitacion && habitacionesConfig[habitacion]) {
+                document.getElementById('precio').value = habitacionesConfig[habitacion].precio;
+                calcularPrecioTotal();
+            }
+        });
+
         // Cerrar modales al hacer clic fuera
         window.onclick = function(event) {
             const modales = document.querySelectorAll('.modal');
@@ -2549,6 +2785,58 @@
         // Detectar cambios de conectividad
         window.addEventListener('online', () => showToast('✅ Conexión restaurada', 'success', 2000));
         window.addEventListener('offline', () => showToast('⚠️ Sin conexión - Datos guardados localmente', 'warning', 3000));
+
+        // Inicialización de la aplicación
+        function inicializarApp() {
+            // Configurar tema inicial
+            document.documentElement.setAttribute('data-theme', tema);
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) {
+                themeIcon.className = tema === 'light' ? 'fas fa-moon text-lg' : 'fas fa-sun text-lg';
+            }
+
+            // Asegurar IDs únicos para reservas existentes
+            reservas.forEach((reserva, index) => {
+                if (!reserva.id) {
+                    reserva.id = 'reserva_' + Date.now() + '_' + index;
+                }
+            });
+
+            // Guardar datos con IDs
+            guardarDatos();
+
+            // Configurar fechas mínimas
+            const hoy = new Date().toISOString().split('T')[0];
+            const mañana = new Date();
+            mañana.setDate(mañana.getDate() + 1);
+            const mañanaStr = mañana.toISOString().split('T')[0];
+
+            const fechaEntrada = document.getElementById('fechaEntrada');
+            const fechaSalida = document.getElementById('fechaSalida');
+            
+            if (fechaEntrada) fechaEntrada.min = hoy;
+            if (fechaSalida) fechaSalida.min = mañanaStr;
+
+            // Cargar página inicial
+            cargarDashboard();
+
+            // Configurar respaldo automático si está activo
+            if (respaldoAutomaticoActivo) {
+                configurarRespaldoAutomatico();
+            }
+
+            // Mostrar mensaje de bienvenida
+            setTimeout(() => {
+                showToast('🏨 Bienvenido al Sistema de Gestión del Hostal Plaza Lebu', 'info', 4000);
+            }, 1000);
+        }
+
+        // Inicializar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', inicializarApp);
+        } else {
+            inicializarApp();
+        }
     </script>
 </body>
 </html>
