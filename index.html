@@ -305,6 +305,27 @@
                 line-height: 0.8;
             }
         }
+
+        .reserva-card {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .reserva-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+        
+        .reserva-card.hab-1-border { border-left: 4px solid #ef4444; }
+        .reserva-card.hab-2-border { border-left: 4px solid #3b82f6; }
+        .reserva-card.hab-3-border { border-left: 4px solid #10b981; }
+        .reserva-card.hab-4-border { border-left: 4px solid #f59e0b; }
+        .reserva-card.hab-5-border { border-left: 4px solid #8b5cf6; }
     </style>
 </head>
 <body>
@@ -396,8 +417,26 @@
 
         <div id="lista" class="page hidden">
             <div class="dashboard-card">
-                <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);">Lista de Reservas</h2>
-                <p>Página en construcción...</p>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-list mr-2"></i>Lista de Reservas</h2>
+                    <div class="flex space-x-3">
+                        <select id="filtroHabitacion" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="">Todas las habitaciones</option>
+                            <option value="1">🔴 Habitación 1</option>
+                            <option value="2">🔵 Habitación 2</option>
+                            <option value="3">🟢 Habitación 3</option>
+                            <option value="4">🟠 Habitación 4</option>
+                            <option value="5">🟣 Habitación 5</option>
+                        </select>
+                        <button onclick="exportarReservas()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                            <i class="fas fa-download mr-2"></i>Exportar
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="listaReservas" class="space-y-3">
+                    <!-- Las reservas se cargarán aquí dinámicamente -->
+                </div>
             </div>
         </div>
 
@@ -676,6 +715,7 @@
             }
             
             if(pageId === 'calendario') generarCalendario();
+            if(pageId === 'lista') generarListaReservas();
         }
 
         // Funciones del calendario
@@ -896,10 +936,128 @@
             }
         }
 
-        // Actualizar estadísticas del header
-        function actualizarHeaderStats() {
-            // Función removida - sin resumen en header
+        // Funciones del listado de reservas
+        function generarListaReservas() {
+            const container = document.getElementById('listaReservas');
+            const filtroHab = document.getElementById('filtroHabitacion');
+            
+            if (!container) return;
+            
+            // Filtrar reservas
+            const habitacionFiltro = filtroHab ? filtroHab.value : '';
+            let reservasFiltradas = [...reservas];
+            
+            if (habitacionFiltro) {
+                reservasFiltradas = reservas.filter(r => r.habitacion.toString() === habitacionFiltro);
+            }
+            
+            // Ordenar por fecha de entrada
+            reservasFiltradas.sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
+            
+            // Limpiar container
+            container.innerHTML = '';
+            
+            if (reservasFiltradas.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8" style="color: var(--text-secondary);">
+                        <i class="fas fa-calendar-times text-4xl mb-3"></i>
+                        <p>No hay reservas para mostrar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Generar cards de reservas
+            reservasFiltradas.forEach(reserva => {
+                const hab = habitacionesConfig[reserva.habitacion];
+                const noches = calcularNoches(reserva.fechaEntrada, reserva.fechaSalida);
+                const total = noches * reserva.precio;
+                
+                const fechaEntrada = new Date(reserva.fechaEntrada);
+                const fechaSalida = new Date(reserva.fechaSalida);
+                
+                const reservaCard = document.createElement('div');
+                reservaCard.className = `reserva-card hab-${reserva.habitacion}-border`;
+                reservaCard.onclick = () => abrirEditarReserva(reserva);
+                
+                reservaCard.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2">
+                            <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">
+                                <i class="fas fa-user mr-2"></i>${reserva.nombreHuesped}
+                            </h3>
+                            <div class="flex items-center mb-2">
+                                <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: ${hab.color};"></span>
+                                <span style="color: var(--text-secondary);">${hab.nombre}</span>
+                                <span class="ml-3 text-sm bg-gray-100 px-2 py-1 rounded" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                                    ${reserva.numPersonas} persona${reserva.numPersonas > 1 ? 's' : ''}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm mb-2">
+                                <div style="color: var(--text-secondary);">Entrada</div>
+                                <div class="font-medium" style="color: var(--text-primary);">
+                                    ${fechaEntrada.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                                </div>
+                            </div>
+                            <div class="text-sm">
+                                <div style="color: var(--text-secondary);">Salida</div>
+                                <div class="font-medium" style="color: var(--text-primary);">
+                                    ${fechaSalida.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm mb-1" style="color: var(--text-secondary);">
+                                ${noches} noche${noches > 1 ? 's' : ''} × $${reserva.precio.toLocaleString()}
+                            </div>
+                            <div class="text-xl font-bold" style="color: var(--primary-color);">
+                                $${total.toLocaleString()}
+                            </div>
+                            ${reserva.notas ? `<div class="text-xs mt-2" style="color: var(--text-secondary);"><i class="fas fa-sticky-note mr-1"></i>${reserva.notas}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(reservaCard);
+            });
         }
+
+        function exportarReservas() {
+            if (reservas.length === 0) {
+                showToast('No hay reservas para exportar', 'warning');
+                return;
+            }
+            
+            let csv = 'Nombre,Habitación,Fecha Entrada,Fecha Salida,Personas,Precio por Noche,Total,Notas\n';
+            
+            reservas.forEach(reserva => {
+                const hab = habitacionesConfig[reserva.habitacion];
+                const noches = calcularNoches(reserva.fechaEntrada, reserva.fechaSalida);
+                const total = noches * reserva.precio;
+                
+                csv += `"${reserva.nombreHuesped}","${hab.nombre}","${reserva.fechaEntrada}","${reserva.fechaSalida}",${reserva.numPersonas},${reserva.precio},${total},"${reserva.notas || ''}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `reservas_hostal_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showToast('Reservas exportadas exitosamente', 'success');
+        }
+
+        // Event listener para el filtro
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const filtroHab = document.getElementById('filtroHabitacion');
+                if (filtroHab) {
+                    filtroHab.addEventListener('change', generarListaReservas);
+                }
+            }, 500);
+        });
 
         // Cerrar modales al hacer clic fuera
         window.onclick = function(event) {
