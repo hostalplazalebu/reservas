@@ -39,18 +39,23 @@
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+            gap: 8px;
+            width: 100%;
         }
         .calendar-day {
-            min-height: 90px;
+            min-height: 100px;
+            height: 100px;
             border: 2px solid var(--border-color);
             border-radius: 12px;
-            padding: 6px;
+            padding: 8px 6px;
             background: var(--bg-primary);
             font-size: 12px;
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         .calendar-day:hover {
             transform: translateY(-2px);
@@ -273,13 +278,15 @@
         /* Responsivo mejorado */
         @media (max-width: 768px) {
             .calendar-day {
-                min-height: 75px;
+                min-height: 85px;
+                height: 85px;
                 font-size: 11px;
-                padding: 4px;
+                padding: 6px 4px;
             }
             .reserva-item {
-                font-size: 10px;
-                padding: 3px 2px;
+                font-size: 9px;
+                padding: 2px;
+                margin: 1px 0;
             }
             .modal-content {
                 max-width: 95%;
@@ -299,12 +306,14 @@
 
         @media (max-width: 640px) {
             .calendar-day {
-                min-height: 65px;
+                min-height: 75px;
+                height: 75px;
                 font-size: 10px;
+                padding: 4px 3px;
             }
             .reserva-item {
-                font-size: 9px;
-                padding: 2px 1px;
+                font-size: 8px;
+                padding: 1px;
             }
         }
     </style>
@@ -351,19 +360,19 @@
         <!-- Navigation mejorada -->
         <div class="dashboard-card mb-6 p-0 overflow-hidden">
             <div class="flex flex-wrap">
-                <button onclick="showPage('calendario')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-blue-500 text-white transition-all duration-300 hover:bg-blue-600">
+                <button onclick="showPage('calendario', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-blue-500 text-white transition-all duration-300 hover:bg-blue-600">
                     <i class="fas fa-calendar mr-2"></i>Calendario
                 </button>
-                <button onclick="showPage('dashboard')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button onclick="showPage('dashboard', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                 </button>
-                <button onclick="showPage('lista')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button onclick="showPage('lista', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-list mr-2"></i>Lista
                 </button>
-                <button onclick="showPage('disponibilidad')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button onclick="showPage('disponibilidad', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-bed mr-2"></i>Disponibilidad
                 </button>
-                <button onclick="showPage('estadisticas')" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button onclick="showPage('estadisticas', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-chart-line mr-2"></i>Estadísticas
                 </button>
             </div>
@@ -959,7 +968,7 @@
         }
 
         // Navegación entre páginas
-        function showPage(pageId) {
+        function showPage(pageId, elemento = null) {
             paginaActiva = pageId;
             
             // Ocultar todas las páginas
@@ -973,12 +982,18 @@
             });
             
             // Mostrar página activa
-            document.getElementById(pageId).classList.remove('hidden');
+            const pageElement = document.getElementById(pageId);
+            if (pageElement) {
+                pageElement.classList.remove('hidden');
+            }
             
-            // Activar tab
-            event.target.classList.add('bg-blue-500', 'text-white');
-            event.target.style.background = '#3b82f6';
-            event.target.style.color = 'white';
+            // Activar tab correcto
+            const activeTab = elemento || document.querySelector(`[onclick*="${pageId}"]`);
+            if (activeTab) {
+                activeTab.classList.add('bg-blue-500', 'text-white');
+                activeTab.style.background = '#3b82f6';
+                activeTab.style.color = 'white';
+            }
             
             // Cargar contenido específico
             switch(pageId) {
@@ -1307,7 +1322,15 @@
             const container = document.getElementById('calendarioDias');
             const mesActualElement = document.getElementById('mesActual');
             
-            if (!container || !mesActualElement) return;
+            if (!container) {
+                console.error('No se encontró el contenedor calendarioDias');
+                return;
+            }
+            
+            if (!mesActualElement) {
+                console.error('No se encontró el elemento mesActual');
+                return;
+            }
             
             container.innerHTML = '';
             
@@ -2960,8 +2983,10 @@
             if (fechaSalida) fechaSalida.min = mañanaStr;
 
             // Cargar página inicial (calendario)
-            generarCalendario();
-            actualizarHeaderStats();
+            setTimeout(() => {
+                generarCalendario();
+                actualizarHeaderStats();
+            }, 100);
 
             // Configurar respaldo automático si está activo
             if (respaldoAutomaticoActivo) {
