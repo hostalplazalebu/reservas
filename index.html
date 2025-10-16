@@ -748,6 +748,18 @@
                 </div>
                 
                 <div>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">
+                        Anticipo/Abono <span class="text-xs opacity-75">(opcional)</span>:
+                    </label>
+                    <input type="number" id="anticipo" placeholder="0" min="0"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                           style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    <p class="text-xs mt-1" style="color: var(--text-secondary);">
+                        Si el cliente pagó un anticipo, ingrésalo aquí. Será incluido en el mensaje de WhatsApp.
+                    </p>
+                </div>
+                
+                <div>
                     <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Notas:</label>
                     <textarea id="notas" rows="3" placeholder="Comentarios adicionales, solicitudes especiales..."
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
@@ -835,6 +847,18 @@
                 </div>
                 
                 <div>
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">
+                        Anticipo/Abono <span class="text-xs opacity-75">(opcional)</span>:
+                    </label>
+                    <input type="number" id="editAnticipo" placeholder="0" min="0"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                           style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    <p class="text-xs mt-1" style="color: var(--text-secondary);">
+                        Si el cliente pagó un anticipo, ingrésalo aquí. Será incluido en el mensaje de WhatsApp.
+                    </p>
+                </div>
+                
+                <div>
                     <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Notas:</label>
                     <textarea id="editNotas" rows="3"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
@@ -844,6 +868,10 @@
                 <div class="flex space-x-3">
                     <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
                         <i class="fas fa-save mr-2"></i>Actualizar
+                    </button>
+                    <button type="button" onclick="abrirMensajeWhatsApp()" 
+                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
                     </button>
                     <button type="button" onclick="eliminarReservaActual()" 
                             class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300">
@@ -855,6 +883,43 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de WhatsApp -->
+    <div id="whatsappModal" class="modal">
+        <div class="modal-content w-full max-w-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold" style="color: var(--text-primary);">
+                    <i class="fab fa-whatsapp mr-2 text-green-500"></i>Mensaje para WhatsApp
+                </h2>
+                <button onclick="closeModal('whatsappModal')" class="text-gray-500 hover:text-red-500 text-2xl transition-colors duration-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded" style="background: rgba(254, 249, 195, 0.3); border-color: var(--warning-color);">
+                <p class="text-sm" style="color: var(--text-primary);">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Este mensaje está listo para copiar y enviar a tu cliente por WhatsApp
+                </p>
+            </div>
+            
+            <div class="bg-gray-50 p-6 rounded-lg mb-6 border-2 border-gray-200" 
+                 style="background: var(--bg-secondary); border-color: var(--border-color); max-height: 400px; overflow-y: auto;">
+                <pre id="mensajeWhatsappTexto" class="whitespace-pre-wrap font-sans text-sm" style="color: var(--text-primary);"></pre>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button onclick="copiarMensajeWhatsApp()" 
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white py-4 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+                    <i class="fas fa-copy mr-2"></i>Copiar Mensaje
+                </button>
+                <button onclick="closeModal('whatsappModal')" 
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-4 rounded-lg font-semibold transition-all duration-300">
+                    <i class="fas fa-times mr-2"></i>Cerrar
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1124,6 +1189,7 @@
                 fechaSalida: document.getElementById('fechaSalida').value,
                 numPersonas: parseInt(document.getElementById('numPersonas').value),
                 precio: parseInt(document.getElementById('precio').value),
+                anticipo: parseInt(document.getElementById('anticipo').value) || 0,
                 notas: document.getElementById('notas').value,
                 fechaCreacion: new Date().toISOString()
             };
@@ -1173,6 +1239,7 @@
             reservaEditando.habitacion = parseInt(document.getElementById('editHabitacion').value);
             reservaEditando.numPersonas = parseInt(document.getElementById('editNumPersonas').value);
             reservaEditando.precio = parseInt(document.getElementById('editPrecio').value);
+            reservaEditando.anticipo = parseInt(document.getElementById('editAnticipo').value) || 0;
             reservaEditando.notas = document.getElementById('editNotas').value;
             reservaEditando.fechaModificacion = new Date().toISOString();
             
@@ -1202,6 +1269,7 @@
             document.getElementById('editHabitacion').value = reserva.habitacion;
             document.getElementById('editNumPersonas').value = reserva.numPersonas;
             document.getElementById('editPrecio').value = reserva.precio;
+            document.getElementById('editAnticipo').value = reserva.anticipo || 0;
             document.getElementById('editNotas').value = reserva.notas || '';
             
             openModal('editarReserva');
@@ -1224,6 +1292,126 @@
                     reservaEditando = null;
                 }
             }
+        }
+
+        // Funciones de WhatsApp
+        function abrirMensajeWhatsApp() {
+            if (!reservaEditando) return;
+            
+            const mensaje = generarMensajeWhatsApp(reservaEditando);
+            document.getElementById('mensajeWhatsappTexto').textContent = mensaje;
+            openModal('whatsappModal');
+        }
+
+        function generarMensajeWhatsApp(reserva) {
+            // Calcular información de la reserva
+            const fechaEntrada = new Date(reserva.fechaEntrada + 'T00:00:00');
+            const fechaSalida = new Date(reserva.fechaSalida + 'T00:00:00');
+            const noches = Math.ceil((fechaSalida - fechaEntrada) / (1000 * 60 * 60 * 24));
+            const precioTotal = reserva.precio * noches;
+            
+            // Obtener información de la habitación
+            const hab = habitacionesConfig[reserva.habitacion];
+            
+            // Formatear fechas en español
+            const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const fechaEntradaStr = fechaEntrada.toLocaleDateString('es-CL', opcionesFecha);
+            const fechaSalidaStr = fechaSalida.toLocaleDateString('es-CL', opcionesFecha);
+            
+            // Calcular anticipo (si existe en los datos de la reserva)
+            const anticipo = reserva.anticipo || 0;
+            const saldoPendiente = precioTotal - anticipo;
+            
+            // Generar mensaje formateado para WhatsApp
+            let mensaje = `🏨 *CONFIRMACIÓN DE RESERVA*\n`;
+            mensaje += `*HOSTAL PLAZA LEBU*\n\n`;
+            
+            mensaje += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            mensaje += `👤 *DATOS DEL HUÉSPED*\n`;
+            mensaje += `Nombre: ${reserva.nombreHuesped}\n`;
+            mensaje += `Personas: ${reserva.numPersonas}\n\n`;
+            
+            mensaje += `📅 *FECHAS DE ESTADÍA*\n`;
+            mensaje += `Check-in: ${fechaEntradaStr}\n`;
+            mensaje += `Check-out: ${fechaSalidaStr}\n`;
+            mensaje += `Noches: ${noches}\n\n`;
+            
+            mensaje += `🏠 *HABITACIÓN ASIGNADA*\n`;
+            mensaje += `${hab.emoji} ${hab.nombre}\n\n`;
+            
+            mensaje += `💰 *DETALLES DE PAGO*\n`;
+            mensaje += `Precio por noche: $${reserva.precio.toLocaleString('es-CL')}\n`;
+            mensaje += `Total estadía: $${precioTotal.toLocaleString('es-CL')}\n`;
+            
+            if (anticipo > 0) {
+                mensaje += `Anticipo pagado: $${anticipo.toLocaleString('es-CL')}\n`;
+                mensaje += `Saldo pendiente: $${saldoPendiente.toLocaleString('es-CL')}\n`;
+            } else {
+                mensaje += `Saldo pendiente: $${precioTotal.toLocaleString('es-CL')}\n`;
+            }
+            
+            mensaje += `\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            mensaje += `📍 *INFORMACIÓN IMPORTANTE*\n\n`;
+            mensaje += `⏰ *Horarios:*\n`;
+            mensaje += `• Check-in: A partir de las 14:00 hrs\n`;
+            mensaje += `• Check-out: Hasta las 12:00 hrs\n\n`;
+            
+            mensaje += `🚗 *Instrucciones de llegada:*\n`;
+            mensaje += `Por favor, avísanos 20 minutos antes de tu llegada para poder recibirte adecuadamente.\n\n`;
+            
+            mensaje += `📞 *Contacto:*\n`;
+            mensaje += `Hostal Plaza Lebu\n`;
+            mensaje += `Dirección: [Tu dirección aquí]\n`;
+            mensaje += `Teléfono: [Tu teléfono aquí]\n`;
+            mensaje += `Email: [Tu email aquí]\n\n`;
+            
+            if (reserva.notas && reserva.notas.trim()) {
+                mensaje += `📝 *Notas adicionales:*\n`;
+                mensaje += `${reserva.notas}\n\n`;
+            }
+            
+            mensaje += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            mensaje += `¡Esperamos recibirte pronto! 🌟\n`;
+            mensaje += `Equipo Hostal Plaza Lebu`;
+            
+            return mensaje;
+        }
+
+        function copiarMensajeWhatsApp() {
+            const mensajeTexto = document.getElementById('mensajeWhatsappTexto').textContent;
+            
+            // Usar la API moderna del portapapeles
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(mensajeTexto).then(() => {
+                    showToast('✅ Mensaje copiado al portapapeles', 'success');
+                }).catch(err => {
+                    // Fallback si falla
+                    copiarMensajeFallback(mensajeTexto);
+                });
+            } else {
+                // Método alternativo para navegadores antiguos
+                copiarMensajeFallback(mensajeTexto);
+            }
+        }
+
+        function copiarMensajeFallback(texto) {
+            const textarea = document.createElement('textarea');
+            textarea.value = texto;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('✅ Mensaje copiado al portapapeles', 'success');
+            } catch (err) {
+                showToast('❌ Error al copiar. Por favor, copia manualmente', 'error');
+            }
+            
+            document.body.removeChild(textarea);
         }
 
         // Funciones del listado de reservas
