@@ -1,371 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=10.0, minimum-scale=0.5, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=10.0, minimum-scale=0.5, viewport-fit=cover">
     <title>HOSTAL PLAZA LEBU</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --primary-color: #3b82f6;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --error-color: #ef4444;
-            --purple-color: #8b5cf6;
-            --bg-primary: #ffffff;
-            --bg-secondary: #f9fafb;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --border-color: #e5e7eb;
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #1f2937;
-            --bg-secondary: #111827;
-            --text-primary: #f9fafb;
-            --text-secondary: #d1d5db;
-            --border-color: #374151;
-        }
-
-        body {
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            width: 100%;
-        }
-        
-        @media (max-width: 768px) {
-            .calendar-grid {
-                gap: 2px;
-            }
-        }
-        
-        @media (max-width: 640px) {
-            .calendar-grid {
-                gap: 1px;
-            }
-        }
-        
-        .calendar-day {
-            min-height: 120px;
-            height: auto;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 4px 3px;
-            background: var(--bg-primary);
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: visible;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .calendar-day:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border-color: var(--primary-color);
-        }
-        
-        .calendar-day.today {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-            border: 2px solid #1e40af;
-        }
-        
-        .reserva-item {
-            font-size: 8px;
-            font-weight: 500;
-            color: white;
-            padding: 1px 2px;
-            margin: 0.5px 0;
-            border-radius: 3px;
-            text-align: left;
-            line-height: 1.0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: visible;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            min-height: 14px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            word-break: break-word;
-        }
-        
-        .reserva-item:hover {
-            transform: scale(1.1);
-            z-index: 10;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-        }
-        
-        .hab-1 { 
-            background: linear-gradient(135deg, #fca5a5, #f87171); 
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-        .hab-2 { 
-            background: linear-gradient(135deg, #93c5fd, #60a5fa); 
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-        .hab-3 { 
-            background: linear-gradient(135deg, #6ee7b7, #34d399); 
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-        .hab-4 { 
-            background: linear-gradient(135deg, #fde047, #facc15); 
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-        .hab-5 { 
-            background: linear-gradient(135deg, #c4b5fd, #a78bfa); 
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .dashboard-card {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .modal-content {
-            background: var(--bg-primary);
-            max-width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            transform: scale(0.9);
-            animation: slideIn 0.3s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideIn {
-            from { transform: scale(0.9) translateY(-20px); opacity: 0; }
-            to { transform: scale(1) translateY(0); opacity: 1; }
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1100;
-            min-width: 300px;
-            padding: 16px 20px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            transform: translateX(400px);
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        
-        .toast.show {
-            transform: translateX(0);
-        }
-        
-        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
-        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
-
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            background: var(--bg-primary);
-            border: 2px solid var(--border-color);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .theme-toggle:hover {
-            transform: scale(1.1) rotate(180deg);
-        }
-
-        @media (max-width: 768px) {
-            .calendar-day {
-                min-height: 100px;
-                height: auto;
-                max-height: 140px;
-                font-size: 14px;
-                font-weight: 500;
-                padding: 3px 2px;
-                border-width: 1px;
-                overflow-y: auto;
-            }
-            .reserva-item {
-                font-size: 7px;
-                font-weight: 500;
-                padding: 1px 1px;
-                margin: 0px 0;
-                min-height: 12px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-                border-width: 1px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .calendar-day {
-                min-height: 85px;
-                height: auto;
-                max-height: 120px;
-                font-size: 13px;
-                font-weight: 500;
-                padding: 2px 2px;
-                border-width: 1px;
-                overflow-y: auto;
-            }
-            .reserva-item {
-                font-size: 6px;
-                font-weight: 600;
-                padding: 1px 1px;
-                margin: 0px 0;
-                min-height: 10px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-                border-width: 1px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .calendar-day {
-                min-height: 75px;
-                height: auto;
-                max-height: 100px;
-                font-size: 12px;
-                font-weight: 500;
-                padding: 2px 1px;
-                border-width: 1px;
-                overflow-y: auto;
-            }
-            .reserva-item {
-                font-size: 5px;
-                font-weight: 600;
-                padding: 0.5px 1px;
-                margin: 0px 0;
-                min-height: 8px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
-                border-width: 1px;
-                line-height: 0.8;
-            }
-        }
-
-        .reserva-card {
-            background: var(--bg-primary);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .reserva-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border-color: var(--primary-color);
-        }
-        
-        .reserva-card.hab-1-border { border-left: 4px solid #ef4444; }
-        .reserva-card.hab-2-border { border-left: 4px solid #3b82f6; }
-        .reserva-card.hab-3-border { border-left: 4px solid #10b981; }
-        .reserva-card.hab-4-border { border-left: 4px solid #f59e0b; }
-        .reserva-card.hab-5-border { border-left: 4px solid #8b5cf6; }
-
-        /* Estilos para disponibilidad */
-        .grid-cols-15 {
-            grid-template-columns: repeat(15, minmax(0, 1fr));
-        }
-
-        /* Estilos para gráficos responsivos */
-        @media (max-width: 640px) {
-            #estadisticas .dashboard-card {
-                padding: 16px;
-            }
-            
-            #estadisticas h3 {
-                font-size: 16px;
-                margin-bottom: 16px;
-            }
-            
-            #estadisticas canvas {
-                max-height: 200px !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            #estadisticas .dashboard-card {
-                padding: 12px;
-                margin-bottom: 16px;
-            }
-            
-            #estadisticas h3 {
-                font-size: 14px;
-                margin-bottom: 12px;
-            }
-            
-            #estadisticas canvas {
-                max-height: 180px !important;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="./src/style.css?v=9">
 </head>
+
 <body>
     <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
         <i id="theme-icon" class="fas fa-moon text-lg"></i>
@@ -373,14 +19,93 @@
 
     <div id="toast-container"></div>
 
-    <div class="container mx-auto p-4 max-w-7xl">
-        <!-- Header -->
-        <div class="dashboard-card mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
-            <div class="flex items-center justify-center">
-                <i class="fas fa-hotel text-4xl mr-3"></i>
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+        <div class="dashboard-card w-full max-w-md p-8 shadow-2xl">
+            <div class="text-center mb-8">
+                <i class="fas fa-hotel text-5xl text-blue-600 mb-4"></i>
+                <h1 class="text-3xl font-bold text-gray-800">Hostal Plaza Lebu</h1>
+                <p class="text-gray-500">Acceso Administrativo</p>
+            </div>
+            <form id="login-form" class="space-y-6">
                 <div>
-                    <h1 class="text-4xl font-bold mb-1">HOSTAL PLAZA LEBU</h1>
-                    <p class="text-xl opacity-90">Sistema de Gestión de Reservas</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="login-email" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="usuario@ejemplo.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                    <input type="password" id="login-password" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="••••••••">
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105">
+                    Iniciar Sesión
+                </button>
+            </form>
+            <div class="mt-4 text-center">
+                <button onclick="mostrarRecuperarPassword()" class="text-sm text-blue-600 hover:underline">
+                    ¿Olvidaste tu contraseña?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Recuperar Password (Simple Prompt) -->
+    <script>
+        function mostrarRecuperarPassword() {
+            const email = prompt("Ingresa tu correo electrónico para enviarte un enlace de recuperación:");
+            if (email) {
+                window.db.sendPasswordReset(email)
+                    .then(() => alert("✅ Correo de recuperación enviado. Revisa tu bandeja de entrada."))
+                    .catch(err => alert("❌ Error: " + err.message));
+            }
+        }
+    </script>
+
+    <div id="app-content" class="hidden">
+        <div class="container mx-auto p-4 max-w-7xl">
+            <!-- Header -->
+            <div class="dashboard-card mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
+                <div class="flex items-center justify-center">
+                    <i class="fas fa-hotel text-4xl mr-3"></i>
+                    <div>
+                        <h1 class="text-4xl font-bold mb-1">HOSTAL PLAZA LEBU</h1>
+                        <p class="text-xl opacity-90">Sistema de Gestión de Reservas</p>
+                    </div>
+                    <button onclick="db.signOut()"
+                        class="absolute top-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg text-sm transition-all">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                        <div class="text-xl font-bold" id="header-ocupadas">0</div>
+                        <div class="text-xs opacity-80 uppercase tracking-wider">Ocupadas</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                        <div class="text-xl font-bold" id="header-disponibles">5</div>
+                        <div class="text-xs opacity-80 uppercase tracking-wider">Disponibles</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                        <div class="text-xl font-bold" id="header-checkins">0</div>
+                        <div class="text-xs opacity-80 uppercase tracking-wider">In Hoy</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                        <div class="text-xl font-bold" id="header-checkouts">0</div>
+                        <div class="text-xs opacity-80 uppercase tracking-wider">Out Hoy</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                        <div class="text-xl font-bold" id="header-ingresos">$0</div>
+                        <div class="text-xs opacity-80 uppercase tracking-wider">Ingresos</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                        <div class="text-xl font-bold text-yellow-300" id="header-pendientes">$0</div>
+                        <div class="text-xs opacity-80 uppercase tracking-wider">Por Cobrar</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -388,20 +113,34 @@
         <!-- Navigation -->
         <div class="dashboard-card mb-6 p-0 overflow-hidden">
             <div class="flex flex-wrap">
-                <button onclick="showPage('calendario', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-blue-500 text-white transition-all duration-300 hover:bg-blue-600">
+                <button id="nav-calendario" onclick="showPage('calendario', this)"
+                    class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-blue-500 text-white transition-all duration-300 hover:bg-blue-600">
                     <i class="fas fa-calendar mr-2"></i>Calendario
                 </button>
-                <button onclick="showPage('dashboard', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button id="nav-dashboard" onclick="showPage('dashboard', this)"
+                    class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300 hidden"
+                    style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                 </button>
-                <button onclick="showPage('lista', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button id="nav-lista" onclick="showPage('lista', this)"
+                    class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300 hidden"
+                    style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-list mr-2"></i>Lista
                 </button>
-                <button onclick="showPage('disponibilidad', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button id="nav-disponibilidad" onclick="showPage('disponibilidad', this)"
+                    class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300 hidden"
+                    style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-bed mr-2"></i>Disponibilidad
                 </button>
-                <button onclick="showPage('estadisticas', this)" class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300" style="background: var(--bg-secondary); color: var(--text-secondary);">
+                <button id="nav-estadisticas" onclick="showPage('estadisticas', this)"
+                    class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300 hidden"
+                    style="background: var(--bg-secondary); color: var(--text-secondary);">
                     <i class="fas fa-chart-line mr-2"></i>Estadísticas
+                </button>
+                <button id="nav-usuarios" onclick="showPage('usuarios', this)"
+                    class="nav-tab flex-1 py-4 px-3 text-sm font-semibold bg-gray-200 text-gray-700 transition-all duration-300 hover:bg-gray-300 hidden"
+                    style="background: var(--bg-secondary); color: var(--text-secondary);">
+                    <i class="fas fa-users mr-2"></i>Usuarios
                 </button>
             </div>
         </div>
@@ -410,24 +149,29 @@
         <div id="calendario" class="page active">
             <div class="dashboard-card">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-calendar-alt mr-2"></i>Calendario de Reservas</h2>
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i
+                            class="fas fa-calendar-alt mr-2"></i>Calendario de Reservas</h2>
                     <div class="flex space-x-3">
-                        <button onclick="verHoy()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                        <button onclick="verHoy()"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
                             <i class="fas fa-today mr-2"></i>Hoy
                         </button>
-                        <button onclick="openModal('nuevaReserva')" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+                        <button onclick="openModal('nuevaReserva')"
+                            class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
                             <i class="fas fa-plus mr-2"></i>Nueva Reserva
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="mb-6 flex justify-between items-center">
-                    <button onclick="cambiarMes(-1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
+                    <button onclick="cambiarMes(-1)"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                     <div class="flex items-center space-x-3">
                         <h3 id="mesActual" class="text-2xl font-bold" style="color: var(--text-primary);"></h3>
-                        <select id="navegacionMes" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <select id="navegacionMes" class="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                             <option value="0">Enero</option>
                             <option value="1">Febrero</option>
                             <option value="2">Marzo</option>
@@ -441,7 +185,8 @@
                             <option value="10">Noviembre</option>
                             <option value="11">Diciembre</option>
                         </select>
-                        <select id="navegacionAño" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <select id="navegacionAño" class="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                             <option value="2023">2023</option>
                             <option value="2024">2024</option>
                             <option value="2025">2025</option>
@@ -449,89 +194,140 @@
                             <option value="2027">2027</option>
                         </select>
                     </div>
-                    <button onclick="cambiarMes(1)" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
+                    <button onclick="cambiarMes(1)"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
 
                 <div class="calendar-grid mb-4">
-                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">LUN</div>
-                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">MAR</div>
-                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">MIÉ</div>
-                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">JUE</div>
-                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">VIE</div>
-                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">SÁB</div>
-                    <div class="text-center font-bold py-3 rounded-lg" style="background: var(--bg-secondary); color: var(--text-secondary);">DOM</div>
+                    <div class="text-center font-bold py-3 rounded-lg"
+                        style="background: var(--bg-secondary); color: var(--text-secondary);">LUN</div>
+                    <div class="text-center font-bold py-3 rounded-lg"
+                        style="background: var(--bg-secondary); color: var(--text-secondary);">MAR</div>
+                    <div class="text-center font-bold py-3 rounded-lg"
+                        style="background: var(--bg-secondary); color: var(--text-secondary);">MIÉ</div>
+                    <div class="text-center font-bold py-3 rounded-lg"
+                        style="background: var(--bg-secondary); color: var(--text-secondary);">JUE</div>
+                    <div class="text-center font-bold py-3 rounded-lg"
+                        style="background: var(--bg-secondary); color: var(--text-secondary);">VIE</div>
+                    <div class="text-center font-bold py-3 rounded-lg"
+                        style="background: var(--bg-secondary); color: var(--text-secondary);">SÁB</div>
+                    <div class="text-center font-bold py-3 rounded-lg"
+                        style="background: var(--bg-secondary); color: var(--text-secondary);">DOM</div>
                 </div>
-                
+
                 <div id="calendarioDias" class="calendar-grid"></div>
             </div>
         </div>
 
-        <!-- Otras páginas (placeholder por ahora) -->
+        <!-- Dashboard -->
         <div id="dashboard" class="page hidden">
-            <div class="dashboard-card">
-                <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);"><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</h2>
-                
-                <!-- Estadísticas Rápidas -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3);">
-                        <div class="text-blue-600 text-3xl font-bold mb-1" id="totalReservas">0</div>
-                        <div class="text-sm" style="color: var(--text-secondary);">Total Reservas</div>
+            <!-- Resumen de Actividad Hoy -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-600 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Check-ins Hoy</h3>
+                            <p class="text-3xl font-bold" id="dash-checkins-hoy">0</p>
+                        </div>
+                        <i class="fas fa-sign-in-alt text-4xl opacity-70"></i>
                     </div>
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
-                        <div class="text-green-600 text-3xl font-bold mb-1" id="reservasActivas">0</div>
-                        <div class="text-sm" style="color: var(--text-secondary);">Activas Hoy</div>
-                    </div>
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3);">
-                        <div class="text-yellow-600 text-3xl font-bold mb-1" id="ingresosMes">$0</div>
-                        <div class="text-sm" style="color: var(--text-secondary);">Ingresos del Mes</div>
-                    </div>
-                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3);">
-                        <div class="text-purple-600 text-3xl font-bold mb-1" id="ocupacionPromedio">0%</div>
-                        <div class="text-sm" style="color: var(--text-secondary);">Ocupación Promedio</div>
-                    </div>
+                    <div class="text-sm opacity-80" id="dash-checkins-pendientes">0 pendientes</div>
                 </div>
 
-                <!-- Resumen por Habitación -->
-                <div class="dashboard-card mb-6">
-                    <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Resumen por Habitación</h3>
-                    <div id="resumenHabitaciones" class="space-y-3">
-                        <!-- Se llena dinámicamente -->
+                <div class="dashboard-card bg-gradient-to-br from-red-500 to-red-600 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Check-outs Hoy</h3>
+                            <p class="text-3xl font-bold" id="dash-checkouts-hoy">0</p>
+                        </div>
+                        <i class="fas fa-sign-out-alt text-4xl opacity-70"></i>
                     </div>
+                    <div class="text-sm opacity-80" id="dash-checkouts-pendientes">0 pendientes</div>
                 </div>
 
-                <!-- Próximas Llegadas -->
+                <div class="dashboard-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Ocupación</h3>
+                            <p class="text-3xl font-bold" id="dash-ocupacion">0%</p>
+                        </div>
+                        <i class="fas fa-percentage text-4xl opacity-70"></i>
+                    </div>
+                    <div class="text-sm opacity-80" id="dash-habitaciones-ocupadas">0 de 5 ocupadas</div>
+                </div>
+            </div>
+
+            <!-- Próximos 7 días -->
+            <div class="dashboard-card mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800" style="color: var(--text-primary);">
+                        <i class="fas fa-calendar-week mr-2"></i>Próximos 7 Días
+                    </h2>
+                    <button onclick="openModal('nuevaReserva')"
+                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-plus mr-2"></i>Nueva Reserva
+                    </button>
+                </div>
+                <div id="proximos-dias" class="grid grid-cols-1 md:grid-cols-7 gap-4"></div>
+            </div>
+
+            <!-- Check-ins y Check-outs de Hoy -->
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
                 <div class="dashboard-card">
-                    <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Próximas Llegadas (7 días)</h3>
-                    <div id="proximasLlegadas" class="space-y-3">
-                        <!-- Se llena dinámicamente -->
-                    </div>
+                    <h3 class="text-xl font-semibold mb-4 text-green-600">
+                        <i class="fas fa-arrow-right mr-2"></i>Check-ins de Hoy
+                    </h3>
+                    <div id="checkins-hoy" class="space-y-3"></div>
                 </div>
+
+                <div class="dashboard-card">
+                    <h3 class="text-xl font-semibold mb-4 text-red-600">
+                        <i class="fas fa-arrow-left mr-2"></i>Check-outs de Hoy
+                    </h3>
+                    <div id="checkouts-hoy" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Reservas Próximas -->
+            <div class="dashboard-card">
+                <h3 class="text-xl font-semibold mb-4" style="color: var(--text-primary);">
+                    <i class="fas fa-clock mr-2"></i>Próximas Reservas
+                </h3>
+                <div id="proximas-reservas" class="space-y-3"></div>
             </div>
         </div>
 
+        <!-- Lista -->
         <div id="lista" class="page hidden">
             <div class="dashboard-card">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-list mr-2"></i>Lista de Reservas</h2>
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i
+                            class="fas fa-list mr-2"></i>Lista de Reservas</h2>
                     <div class="flex space-x-3">
-                        <button onclick="importarReservas()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                        <button onclick="importarReservas()"
+                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
                             <i class="fas fa-upload mr-2"></i>Importar
                         </button>
-                        <button onclick="exportarReservas()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                        <button onclick="exportarReservas()"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
                             <i class="fas fa-download mr-2"></i>Exportar
+                        </button>
+                        <button onclick="migrateData()"
+                            class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300">
+                            <i class="fas fa-file-import mr-2"></i>Migrar Datos
                         </button>
                     </div>
                 </div>
-                
                 <div class="flex flex-wrap gap-3 mb-6">
                     <div class="flex-1 min-w-64">
-                        <input type="text" id="buscadorReservas" placeholder="🔍 Buscar por nombre del huésped..." 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <input type="text" id="buscadorReservas" placeholder="🔍 Buscar por nombre del huésped..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                     </div>
-                    <select id="filtroHabitacion" class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-48" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    <select id="filtroHabitacion" class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-48"
+                        style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                         <option value="">🏠 Todas las habitaciones</option>
                         <option value="1">🔴 Habitación 1</option>
                         <option value="2">🔵 Habitación 2</option>
@@ -539,1767 +335,348 @@
                         <option value="4">🟠 Habitación 4</option>
                         <option value="5">🟣 Habitación 5</option>
                     </select>
-                    <select id="ordenarReservas" class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-48" style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                        <option value="fecha_asc">📅 Por fecha (próximas primero)</option>
-                        <option value="fecha_desc">📅 Por fecha (recientes primero)</option>
-                        <option value="nombre_asc">📝 Por nombre (A-Z)</option>
-                        <option value="nombre_desc">📝 Por nombre (Z-A)</option>
-                        <option value="habitacion_asc">🏠 Por habitación (1-5)</option>
-                        <option value="precio_desc">💰 Por precio (mayor-menor)</option>
-                    </select>
                 </div>
-                
-                <div id="listaReservas" class="space-y-3">
-                    <!-- Las reservas se cargarán aquí dinámicamente -->
-                </div>
+                <div id="listaReservas" class="space-y-3"></div>
             </div>
         </div>
 
+        <!-- Disponibilidad -->
         <div id="disponibilidad" class="page hidden">
             <div class="dashboard-card">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-bed mr-2"></i>Disponibilidad</h2>
-                    <div class="text-sm" style="color: var(--text-secondary);" id="fechaDisponibilidad">
-                        <!-- Se actualiza dinámicamente -->
-                    </div>
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i
+                            class="fas fa-bed mr-2"></i>Disponibilidad</h2>
+                    <div class="text-sm" id="fechaDisponibilidad" style="color: var(--text-secondary);"></div>
                 </div>
-
-                <!-- Estado Actual de Habitaciones -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Estado Actual</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" id="estadoHabitaciones">
-                        <!-- Se llena dinámicamente -->
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" id="estadoHabitaciones"></div>
                 </div>
+                <div id="calendarioDisponibilidad" class="overflow-x-auto"></div>
+            </div>
+        </div>
 
-                <!-- Calendario de Disponibilidad Simple -->
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold" style="color: var(--text-primary);">Próximos 14 Días</h3>
-                        <div class="flex text-xs space-x-4">
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 bg-green-500 rounded mr-1"></div>
-                                <span style="color: var(--text-secondary);">Libre</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 bg-red-500 rounded mr-1"></div>
-                                <span style="color: var(--text-secondary);">Ocupado</span>
-                            </div>
-                        </div>
+        <!-- Estadísticas -->
+        <div id="estadisticas" class="page hidden">
+            <div class="dashboard-card">
+                <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);"><i
+                        class="fas fa-chart-line mr-2"></i>Estadísticas</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="dashboard-card">
+                        <h3 class="text-lg font-semibold mb-4 text-center">📊 Ocupación</h3>
+                        <div style="height: 250px;"><canvas id="graficoOcupacion"></canvas></div>
                     </div>
-                    <div id="calendarioDisponibilidad" class="overflow-x-auto">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Resumen de Disponibilidad -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
-                        <div class="text-green-600 text-2xl font-bold mb-1" id="habitacionesLibres">0</div>
-                        <div class="text-sm" style="color: var(--text-secondary);">Habitaciones Libres Hoy</div>
-                    </div>
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3);">
-                        <div class="text-yellow-600 text-2xl font-bold mb-1" id="proximasSalidas">0</div>
-                        <div class="text-sm" style="color: var(--text-secondary);">Salidas Mañana</div>
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3);">
-                        <div class="text-blue-600 text-2xl font-bold mb-1" id="proximasLlegadas">0</div>
-                        <div class="text-sm" style="color: var(--text-secondary);">Llegadas Mañana</div>
+                    <div class="dashboard-card">
+                        <h3 class="text-lg font-semibold mb-4 text-center">💰 Ingresos</h3>
+                        <div style="height: 250px;"><canvas id="graficoIngresos"></canvas></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="estadisticas" class="page hidden">
+        <div id="usuarios" class="page hidden">
             <div class="dashboard-card">
-                <h2 class="text-2xl font-bold mb-6" style="color: var(--text-primary);"><i class="fas fa-chart-line mr-2"></i>Estadísticas</h2>
-                
-                <!-- Gráfico 1: Ocupación por Habitación (Donut) -->
-                <div class="dashboard-card mb-6">
-                    <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--text-primary);">📊 Ocupación por Habitación</h3>
-                    <div class="flex justify-center">
-                        <div style="width: 100%; max-width: 300px; height: 250px;">
-                            <canvas id="graficoOcupacion"></canvas>
-                        </div>
-                    </div>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i
+                            class="fas fa-users mr-2"></i>Gestión de Usuarios</h2>
+                    <button onclick="openModal('nuevoUsuario')"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all">
+                        <i class="fas fa-user-plus mr-2"></i>Nuevo Usuario
+                    </button>
                 </div>
-
-                <!-- Gráfico 2: Ingresos por Mes (Barras) -->
-                <div class="dashboard-card mb-6">
-                    <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--text-primary);">💰 Ingresos por Mes</h3>
-                    <div style="width: 100%; height: 250px;">
-                        <canvas id="graficoIngresos"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 3: Reservas por Mes (Línea) -->
-                <div class="dashboard-card mb-6">
-                    <h3 class="text-lg font-semibold mb-4 text-center" style="color: var(--text-primary);">📈 Reservas por Mes</h3>
-                    <div style="width: 100%; height: 250px;">
-                        <canvas id="graficoReservas"></canvas>
-                    </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr style="color: var(--text-secondary); border-bottom: 1px solid var(--border-color);">
+                                <th class="py-4 px-4">Email</th>
+                                <th class="py-4 px-4">Rol</th>
+                                <th class="py-4 px-4">Fecha Registro</th>
+                                <th class="py-4 px-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaUsuarios">
+                            <!-- Los usuarios se cargarán aquí dinámicamente -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Nueva Reserva -->
+    <!-- Modals -->
+    <!-- Nueva Reserva -->
     <div id="nuevaReserva" class="modal">
         <div class="modal-content w-full max-w-lg">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-plus-circle mr-2"></i>Nueva Reserva</h2>
-                <button onclick="closeModal('nuevaReserva')" class="text-gray-500 hover:text-red-500 text-2xl transition-colors duration-300">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h2 class="text-2xl font-bold"><i class="fas fa-plus-circle mr-2"></i>Nueva Reserva</h2>
+                <button onclick="closeModal('nuevaReserva')" class="text-gray-500 hover:text-red-500 text-2xl"><i
+                        class="fas fa-times"></i></button>
             </div>
-            
             <form id="formReserva" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Nombre del Huésped:</label>
-                    <input type="text" id="nombreHuesped" required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                           style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    <label class="block text-sm font-medium mb-2">Nombre del Huésped:</label>
+                    <input type="text" id="nombreHuesped" required class="w-full px-4 py-3 border rounded-lg"
+                        style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Fecha Entrada:</label>
-                        <input type="date" id="fechaEntrada" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <label class="block text-sm font-medium mb-2">Fecha Entrada:</label>
+                        <input type="date" id="fechaEntrada" required class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Fecha Salida:</label>
-                        <input type="date" id="fechaSalida" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <label class="block text-sm font-medium mb-2">Fecha Salida:</label>
+                        <input type="date" id="fechaSalida" required class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                     </div>
                 </div>
-                
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">
-                        Habitaciones: <span class="text-xs opacity-75">(puedes seleccionar varias)</span>
-                    </label>
-                    <div class="border border-gray-300 rounded-lg p-3 space-y-2" style="border-color: var(--border-color); background: var(--bg-primary);">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="hab1" name="habitaciones" value="1" 
-                                   class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <label for="hab1" class="text-sm cursor-pointer flex items-center" style="color: var(--text-primary);">
-                                <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: #ef4444;"></span>
-                                🔴 Habitación 1 (Roja) - $45.000/noche
-                            </label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="hab2" name="habitaciones" value="2" 
-                                   class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <label for="hab2" class="text-sm cursor-pointer flex items-center" style="color: var(--text-primary);">
-                                <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: #3b82f6;"></span>
-                                🔵 Habitación 2 (Azul) - $45.000/noche
-                            </label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="hab3" name="habitaciones" value="3" 
-                                   class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <label for="hab3" class="text-sm cursor-pointer flex items-center" style="color: var(--text-primary);">
-                                <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: #10b981;"></span>
-                                🟢 Habitación 3 (Verde) - $48.000/noche
-                            </label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="hab4" name="habitaciones" value="4" 
-                                   class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <label for="hab4" class="text-sm cursor-pointer flex items-center" style="color: var(--text-primary);">
-                                <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: #f59e0b;"></span>
-                                🟠 Habitación 4 (Naranja) - $42.000/noche
-                            </label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="hab5" name="habitaciones" value="5" 
-                                   class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                            <label for="hab5" class="text-sm cursor-pointer flex items-center" style="color: var(--text-primary);">
-                                <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: #8b5cf6;"></span>
-                                🟣 Habitación 5 (Morada) - $50.000/noche
-                            </label>
-                        </div>
+                    <label class="block text-sm font-medium mb-2">Habitaciones:</label>
+                    <div class="border rounded-lg p-3 space-y-2"
+                        style="border-color: var(--border-color); background: var(--bg-primary);">
+                        <!-- Habitaciones checkboxes -->
+                        <div class="flex items-center"><input type="checkbox" name="habitaciones" value="1"
+                                class="mr-2"> Hab 1 (Roja)</div>
+                        <div class="flex items-center"><input type="checkbox" name="habitaciones" value="2"
+                                class="mr-2"> Hab 2 (Azul)</div>
+                        <div class="flex items-center"><input type="checkbox" name="habitaciones" value="3"
+                                class="mr-2"> Hab 3 (Verde)</div>
+                        <div class="flex items-center"><input type="checkbox" name="habitaciones" value="4"
+                                class="mr-2"> Hab 4 (Naranja)</div>
+                        <div class="flex items-center"><input type="checkbox" name="habitaciones" value="5"
+                                class="mr-2"> Hab 5 (Morada)</div>
                     </div>
-                    <div id="resumenHabitaciones" class="mt-2 text-xs" style="color: var(--text-secondary);">
-                        Ninguna habitación seleccionada
-                    </div>
+                    <div id="resumenHabitacionesForm" class="mt-2 text-xs text-gray-500"></div>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Personas:</label>
-                        <select id="numPersonas" required 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                                style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <label class="block text-sm font-medium mb-2">Personas:</label>
+                        <select id="numPersonas" class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                             <option value="1">1 persona</option>
                             <option value="2" selected>2 personas</option>
-                            <option value="3">3 personas</option>
-                            <option value="4">4 personas</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Precio:</label>
+                            <input type="number" id="precio" required class="w-full px-4 py-3 border rounded-lg"
+                                style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Anticipo:</label>
+                            <input type="number" id="anticipo" class="w-full px-4 py-3 border rounded-lg"
+                                style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"
+                                placeholder="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Estado de Pago:</label>
+                        <select id="estadoPago" class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="pendiente" selected>🔴 Pendiente</option>
+                            <option value="parcial">🟡 Parcial</option>
+                            <option value="pagado">🟢 Pagado</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Precio por Noche:</label>
-                        <input type="number" id="precio" placeholder="45000" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <label class="block text-sm font-medium mb-2">Método de Pago:</label>
+                        <select id="metodoPago" class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="efectivo" selected>💵 Efectivo</option>
+                            <option value="transferencia">📱 Transferencia</option>
+                            <option value="tarjeta">💳 Tarjeta</option>
+                        </select>
                     </div>
                 </div>
-                
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">
-                        Anticipo/Abono <span class="text-xs opacity-75">(opcional)</span>:
-                    </label>
-                    <input type="number" id="anticipo" placeholder="0" min="0"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                           style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                    <p class="text-xs mt-1" style="color: var(--text-secondary);">
-                        Si el cliente pagó un anticipo, ingrésalo aquí. Será incluido en el mensaje de WhatsApp.
-                    </p>
+                    <label class="block text-sm font-medium mb-2">Notas:</label>
+                    <textarea id="notas" class="w-full px-4 py-3 border rounded-lg" rows="2"
+                        style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"
+                        placeholder="Comentarios adicionales..."></textarea>
                 </div>
-                
-                <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Notas:</label>
-                    <textarea id="notas" rows="3" placeholder="Comentarios adicionales, solicitudes especiales..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                              style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"></textarea>
-                </div>
-                
-                <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
-                        <i class="fas fa-save mr-2"></i>Guardar Reserva
-                    </button>
-                    <button type="button" onclick="closeModal('nuevaReserva')" 
-                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-semibold transition-all duration-300">
-                        <i class="fas fa-times mr-2"></i>Cancelar
-                    </button>
-                </div>
+                <button type="submit"
+                    class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-all">
+                    Guardar Reserva
+                </button>
             </form>
         </div>
     </div>
+    </div>
 
-    <!-- Modal Editar Reserva -->
+    <!-- Editar Reserva -->
     <div id="editarReserva" class="modal">
         <div class="modal-content w-full max-w-lg">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold" style="color: var(--text-primary);"><i class="fas fa-edit mr-2"></i>Editar Reserva</h2>
-                <button onclick="closeModal('editarReserva')" class="text-gray-500 hover:text-red-500 text-2xl transition-colors duration-300">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h2 class="text-2xl font-bold"><i class="fas fa-edit mr-2"></i>Editar Reserva</h2>
+                <div class="flex items-center space-x-2">
+                    <button onclick="abrirMensajeWhatsApp()" class="text-green-500 hover:text-green-600 text-xl"
+                        title="Enviar WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                    <button onclick="closeModal('editarReserva')" class="text-gray-500 hover:text-red-500 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
-            
             <form id="formEditarReserva" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Nombre del Huésped:</label>
-                    <input type="text" id="editNombreHuesped" required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                           style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    <label class="block text-sm font-medium mb-2">Nombre del Huésped:</label>
+                    <input type="text" id="editNombreHuesped" required class="w-full px-4 py-3 border rounded-lg"
+                        style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Fecha Entrada:</label>
-                        <input type="date" id="editFechaEntrada" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Fecha Salida:</label>
-                        <input type="date" id="editFechaSalida" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Habitación:</label>
-                    <select id="editHabitacion" required 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                        <label class="block text-sm font-medium mb-2">Fecha Entrada:</label>
+                        <input type="date" id="editFechaEntrada" required class="w-full px-4 py-3 border rounded-lg"
                             style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                        <option value="">Seleccionar habitación</option>
-                        <option value="1">🔴 Habitación 1 (Roja)</option>
-                        <option value="2">🔵 Habitación 2 (Azul)</option>
-                        <option value="3">🟢 Habitación 3 (Verde)</option>
-                        <option value="4">🟠 Habitación 4 (Naranja)</option>
-                        <option value="5">🟣 Habitación 5 (Morada)</option>
-                    </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Fecha Salida:</label>
+                        <input type="date" id="editFechaSalida" required class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Personas:</label>
-                        <select id="editNumPersonas" required 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                                style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                            <option value="1">1 persona</option>
-                            <option value="2">2 personas</option>
-                            <option value="3">3 personas</option>
-                            <option value="4">4 personas</option>
+                        <label class="block text-sm font-medium mb-2">Habitación:</label>
+                        <select id="editHabitacion" required class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="1">Habitación 1 (Roja)</option>
+                            <option value="2">Habitación 2 (Azul)</option>
+                            <option value="3">Habitación 3 (Verde)</option>
+                            <option value="4">Habitación 4 (Naranja)</option>
+                            <option value="5">Habitación 5 (Morada)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Precio por Noche:</label>
-                        <input type="number" id="editPrecio" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                               style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <label class="block text-sm font-medium mb-2">Personas:</label>
+                        <select id="editNumPersonas" class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="1">1 persona</option>
+                            <option value="2">2 personas</option>
+                        </select>
                     </div>
                 </div>
-                
-                <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">
-                        Anticipo/Abono <span class="text-xs opacity-75">(opcional)</span>:
-                    </label>
-                    <input type="number" id="editAnticipo" placeholder="0" min="0"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                           style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                    <p class="text-xs mt-1" style="color: var(--text-secondary);">
-                        Si el cliente pagó un anticipo, ingrésalo aquí. Será incluido en el mensaje de WhatsApp.
-                    </p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Precio por Noche:</label>
+                        <input type="number" id="editPrecio" required class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Anticipo:</label>
+                        <input type="number" id="editAnticipo" class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
                 </div>
-                
-                <div>
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary);">Notas:</label>
-                    <textarea id="editNotas" rows="3"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-                              style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"></textarea>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Estado de Pago:</label>
+                        <select id="editEstadoPago" class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="pendiente">🔴 Pendiente</option>
+                            <option value="parcial">🟡 Parcial</option>
+                            <option value="pagado">🟢 Pagado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Método de Pago:</label>
+                        <select id="editMetodoPago" class="w-full px-4 py-3 border rounded-lg"
+                            style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="efectivo">💵 Efectivo</option>
+                            <option value="transferencia">📱 Transferencia</option>
+                            <option value="tarjeta">💳 Tarjeta</option>
+                        </select>
+                    </div>
                 </div>
-                
-                <div class="flex space-x-3">
-                    <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
-                        <i class="fas fa-save mr-2"></i>Actualizar
+                <div>
+                    <label class="block text-sm font-medium mb-2">Notas:</label>
+                    <textarea id="editNotas" class="w-full px-4 py-3 border rounded-lg" rows="2"
+                        style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" onclick="eliminarReservaActual()"
+                        class="w-full bg-red-100 text-red-600 py-3 rounded-lg font-semibold hover:bg-red-200">
+                        <i class="fas fa-trash-alt mr-2"></i>Eliminar
                     </button>
-                    <button type="button" onclick="abrirMensajeWhatsApp()" 
-                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
-                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
-                    </button>
-                    <button type="button" onclick="eliminarReservaActual()" 
-                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300">
-                        <i class="fas fa-trash mr-2"></i>Eliminar
-                    </button>
-                    <button type="button" onclick="closeModal('editarReserva')" 
-                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300">
-                        <i class="fas fa-times mr-2"></i>Cancelar
+                    <button type="submit"
+                        class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600">
+                        <i class="fas fa-save mr-2"></i>Guardar Cambios
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal de WhatsApp -->
+    <!-- WhatsApp Modal -->
     <div id="whatsappModal" class="modal">
-        <div class="modal-content w-full max-w-2xl">
+        <div class="modal-content w-full max-w-md">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold" style="color: var(--text-primary);">
-                    <i class="fab fa-whatsapp mr-2 text-green-500"></i>Mensaje para WhatsApp
+                <h2 class="text-2xl font-bold text-green-600"><i class="fab fa-whatsapp mr-2"></i>Mensaje WhatsApp
                 </h2>
-                <button onclick="closeModal('whatsappModal')" class="text-gray-500 hover:text-red-500 text-2xl transition-colors duration-300">
+                <button onclick="closeModal('whatsappModal')" class="text-gray-500 hover:text-red-500 text-2xl">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
-            <div class="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded" style="background: rgba(254, 249, 195, 0.3); border-color: var(--warning-color);">
-                <p class="text-sm" style="color: var(--text-primary);">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    Este mensaje está listo para copiar y enviar a tu cliente por WhatsApp
-                </p>
+            <div class="bg-gray-100 p-4 rounded-lg mb-6 whitespace-pre-wrap font-sans text-sm" id="mensajeWhatsappTexto"
+                style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
             </div>
-            
-            <div class="bg-gray-50 p-6 rounded-lg mb-6 border-2 border-gray-200" 
-                 style="background: var(--bg-secondary); border-color: var(--border-color); max-height: 400px; overflow-y: auto;">
-                <pre id="mensajeWhatsappTexto" class="whitespace-pre-wrap font-sans text-sm" style="color: var(--text-primary);"></pre>
-            </div>
-            
-            <div class="flex space-x-3">
-                <button onclick="copiarMensajeWhatsApp()" 
-                        class="flex-1 bg-green-500 hover:bg-green-600 text-white py-4 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
+            <div class="space-y-3">
+                <button onclick="copiarMensajeWhatsApp()"
+                    class="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600">
                     <i class="fas fa-copy mr-2"></i>Copiar Mensaje
                 </button>
-                <button onclick="closeModal('whatsappModal')" 
-                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-4 rounded-lg font-semibold transition-all duration-300">
-                    <i class="fas fa-times mr-2"></i>Cerrar
+                <button onclick="descargarPDFReserva()"
+                    class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600">
+                    <i class="fas fa-file-pdf mr-2"></i>Descargar PDF
                 </button>
+                <p class="text-xs text-center text-gray-500">Puedes copiar este mensaje para WhatsApp o descargar la
+                    confirmación en PDF.</p>
             </div>
         </div>
     </div>
 
-    <script>
-        // Variables globales
-        let reservas = JSON.parse(localStorage.getItem('hostalReservas')) || [];
-        let fechaActual = new Date();
-        let paginaActiva = 'calendario';
-        let tema = localStorage.getItem('tema') || 'light';
-        
-        const habitacionesConfig = {
-            1: { nombre: 'Habitación 1', color: '#ef4444', emoji: '🔴', clase: 'hab-1', precio: 45000 },
-            2: { nombre: 'Habitación 2', color: '#3b82f6', emoji: '🔵', clase: 'hab-2', precio: 45000 },
-            3: { nombre: 'Habitación 3', color: '#10b981', emoji: '🟢', clase: 'hab-3', precio: 48000 },
-            4: { nombre: 'Habitación 4', color: '#f59e0b', emoji: '🟠', clase: 'hab-4', precio: 42000 },
-            5: { nombre: 'Habitación 5', color: '#8b5cf6', emoji: '🟣', clase: 'hab-5', precio: 50000 }
-        };
+    </div>
+    </div>
 
-        // Funciones de utilidad
-        function showToast(message, type = 'success', duration = 3000) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 opacity-70 hover:opacity-100">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <!-- Nuevo Usuario -->
+    <div id="nuevoUsuario" class="modal">
+        <div class="modal-content w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold"><i class="fas fa-user-plus mr-2"></i>Nuevo Usuario</h2>
+                <button onclick="closeModal('nuevoUsuario')" class="text-gray-500 hover:text-red-500 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="formNuevoUsuario" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Email:</label>
+                    <input type="email" id="regEmail" required class="w-full px-4 py-3 border rounded-lg"
+                        style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                 </div>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 400);
-            }, duration);
-        }
-
-        function calcularNoches(entrada, salida) {
-            const fechaEntrada = new Date(entrada);
-            const fechaSalida = new Date(salida);
-            const diferencia = fechaSalida - fechaEntrada;
-            return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
-        }
-
-        // Gestión de temas
-        function toggleTheme() {
-            tema = tema === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', tema);
-            localStorage.setItem('tema', tema);
-            
-            const icon = document.getElementById('theme-icon');
-            icon.className = tema === 'light' ? 'fas fa-moon text-lg' : 'fas fa-sun text-lg';
-            
-            showToast(`Tema ${tema === 'light' ? 'claro' : 'oscuro'} activado`, 'info', 2000);
-        }
-
-        // Navegación entre páginas
-        function showPage(pageId, elemento = null) {
-            paginaActiva = pageId;
-            
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            
-            document.querySelectorAll('.nav-tab').forEach(t => {
-                t.classList.remove('bg-blue-500', 'text-white');
-                t.style.background = 'var(--bg-secondary)';
-                t.style.color = 'var(--text-secondary)';
-            });
-            
-            const pageElement = document.getElementById(pageId);
-            if (pageElement) {
-                pageElement.classList.remove('hidden');
-            }
-            
-            const activeTab = elemento || document.querySelector(`[onclick*="${pageId}"]`);
-            if (activeTab) {
-                activeTab.classList.add('bg-blue-500', 'text-white');
-                activeTab.style.background = '#3b82f6';
-                activeTab.style.color = 'white';
-            }
-            
-            if(pageId === 'calendario') generarCalendario();
-            if(pageId === 'lista') generarListaReservas();
-            if(pageId === 'dashboard') generarDashboard();
-            if(pageId === 'estadisticas') generarEstadisticas();
-            if(pageId === 'disponibilidad') generarDisponibilidad();
-        }
-
-        // Funciones del calendario
-        function cambiarMes(direccion) {
-            fechaActual.setMonth(fechaActual.getMonth() + direccion);
-            generarCalendario();
-        }
-
-        function verHoy() {
-            fechaActual = new Date();
-            generarCalendario();
-        }
-
-        function generarCalendario() {
-            const container = document.getElementById('calendarioDias');
-            const mesActualElement = document.getElementById('mesActual');
-            
-            if (!container) {
-                console.error('No se encontró el contenedor calendarioDias');
-                return;
-            }
-            
-            if (!mesActualElement) {
-                console.error('No se encontró el elemento mesActual');
-                return;
-            }
-            
-            // Actualizar selectores de navegación
-            actualizarNavegacionRapida();
-            
-            container.innerHTML = '';
-            
-            const año = fechaActual.getFullYear();
-            const mes = fechaActual.getMonth();
-            
-            const nombresMeses = [
-                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-            ];
-            
-            mesActualElement.textContent = `${nombresMeses[mes]} ${año}`;
-            
-            // Primer día del mes
-            const primerDia = new Date(año, mes, 1);
-            let diaSemana = primerDia.getDay();
-            if (diaSemana === 0) diaSemana = 7;
-            diaSemana -= 1;
-            
-            // Días en blanco al inicio
-            for (let i = 0; i < diaSemana; i++) {
-                const dia = document.createElement('div');
-                dia.className = 'calendar-day';
-                container.appendChild(dia);
-            }
-            
-            // Días del mes
-            const diasEnMes = new Date(año, mes + 1, 0).getDate();
-            const hoy = new Date();
-            
-            for (let dia = 1; dia <= diasEnMes; dia++) {
-                const diaElement = document.createElement('div');
-                diaElement.className = 'calendar-day';
-                
-                const fechaStr = `${año}-${(mes+1).toString().padStart(2,'0')}-${dia.toString().padStart(2,'0')}`;
-                
-                // Marcar día actual
-                if (dia === hoy.getDate() && mes === hoy.getMonth() && año === hoy.getFullYear()) {
-                    diaElement.classList.add('today');
-                }
-                
-                diaElement.innerHTML = `<div class="font-medium text-center mb-2 text-lg" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.2); color: var(--text-primary);">${dia}</div>`;
-                
-                // Buscar reservas activas para este día
-                const reservasDelDia = reservas.filter(r => {
-                    const entrada = new Date(r.fechaEntrada);
-                    const salida = new Date(r.fechaSalida);
-                    const fecha = new Date(fechaStr);
-                    return fecha >= entrada && fecha < salida;
-                });
-                
-                // Mostrar reservas
-                reservasDelDia.forEach((reserva) => {
-                    const hab = habitacionesConfig[reserva.habitacion];
-                    const reservaDiv = document.createElement('div');
-                    
-                    reservaDiv.className = `reserva-item ${hab.clase}`;
-                    reservaDiv.title = `${reserva.nombreHuesped} - ${hab.nombre}\nEntrada: ${reserva.fechaEntrada}\nSalida: ${reserva.fechaSalida}`;
-                    
-                    // Hacer clickeable para editar
-                    reservaDiv.onclick = (e) => {
-                        e.stopPropagation();
-                        abrirEditarReserva(reserva);
-                    };
-                    
-                    // Mostrar nombre completo si es posible, como en la imagen de referencia
-                    let nombreMostrar = reserva.nombreHuesped;
-                    if (nombreMostrar.length > 15) {
-                        const partes = nombreMostrar.split(' ');
-                        if (partes.length > 2) {
-                            // Para nombres con 3+ palabras: nombre + apellido
-                            nombreMostrar = partes[0] + ' ' + partes[partes.length - 1];
-                        } else if (partes.length === 2) {
-                            // Para nombres con 2 palabras: usar inicial del segundo
-                            nombreMostrar = partes[0] + ' ' + partes[1].substring(0, 1) + '.';
-                        } else {
-                            // Un solo nombre muy largo
-                            nombreMostrar = nombreMostrar.substring(0, 12) + '...';
-                        }
-                    }
-                    
-                    reservaDiv.innerHTML = `
-                        <div style="font-size: 7px; font-weight: 600; line-height: 1.0; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); padding: 1px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${nombreMostrar} (H${reserva.habitacion})</div>
-                    `;
-                    
-                    diaElement.appendChild(reservaDiv);
-                });
-                
-                container.appendChild(diaElement);
-            }
-        }
-
-        // Manejo de modales
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // Función para actualizar resumen de habitaciones seleccionadas
-        function actualizarResumenHabitacionesFormulario() {
-            const checkboxes = document.querySelectorAll('input[name="habitaciones"]:checked');
-            const resumenDiv = document.getElementById('resumenHabitaciones');
-            
-            if (checkboxes.length === 0) {
-                resumenDiv.textContent = 'Ninguna habitación seleccionada';
-                resumenDiv.style.color = 'var(--text-secondary)';
-            } else {
-                const habitaciones = Array.from(checkboxes).map(cb => {
-                    const hab = habitacionesConfig[parseInt(cb.value)];
-                    return hab.nombre;
-                });
-                
-                let total = 0;
-                checkboxes.forEach(cb => {
-                    const habNum = parseInt(cb.value);
-                    total += habitacionesConfig[habNum].precio;
-                });
-                
-                resumenDiv.innerHTML = `
-                    <strong>${checkboxes.length} habitación${checkboxes.length > 1 ? 'es' : ''} seleccionada${checkboxes.length > 1 ? 's' : ''}:</strong><br>
-                    ${habitaciones.join(', ')}<br>
-                    <span style="color: var(--primary-color); font-weight: bold;">Total por noche: $${total.toLocaleString()}</span>
-                `;
-                resumenDiv.style.color = 'var(--text-primary)';
-            }
-        }
-
-        // Formulario de nueva reserva
-        document.getElementById('formReserva').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Obtener habitaciones seleccionadas
-            const habitacionesSeleccionadas = [];
-            document.querySelectorAll('input[name="habitaciones"]:checked').forEach(checkbox => {
-                habitacionesSeleccionadas.push(parseInt(checkbox.value));
-            });
-            
-            if (habitacionesSeleccionadas.length === 0) {
-                showToast('⚠️ Debe seleccionar al menos una habitación', 'warning');
-                return;
-            }
-            
-            const datosComunes = {
-                nombreHuesped: document.getElementById('nombreHuesped').value,
-                fechaEntrada: document.getElementById('fechaEntrada').value,
-                fechaSalida: document.getElementById('fechaSalida').value,
-                numPersonas: parseInt(document.getElementById('numPersonas').value),
-                precio: parseInt(document.getElementById('precio').value),
-                anticipo: parseInt(document.getElementById('anticipo').value) || 0,
-                notas: document.getElementById('notas').value,
-                fechaCreacion: new Date().toISOString()
-            };
-            
-            // Crear una reserva por cada habitación seleccionada
-            let reservasCreadas = 0;
-            let nombresHabitaciones = [];
-            
-            habitacionesSeleccionadas.forEach((habNum, index) => {
-                const reserva = {
-                    ...datosComunes,
-                    id: Date.now().toString() + '_' + index,
-                    habitacion: habNum
-                };
-                
-                reservas.push(reserva);
-                reservasCreadas++;
-                nombresHabitaciones.push(habitacionesConfig[habNum].nombre);
-            });
-            
-            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
-            
-            closeModal('nuevaReserva');
-            this.reset();
-            // Limpiar checkboxes
-            document.querySelectorAll('input[name="habitaciones"]').forEach(cb => cb.checked = false);
-            actualizarResumenHabitacionesFormulario();
-            generarCalendario();
-            
-            if (reservasCreadas === 1) {
-                showToast(`✅ Reserva guardada: ${datosComunes.nombreHuesped} en ${nombresHabitaciones[0]}`, 'success');
-            } else {
-                showToast(`✅ ${reservasCreadas} reservas guardadas: ${datosComunes.nombreHuesped} en ${nombresHabitaciones.join(', ')}`, 'success', 4000);
-            }
-        });
-
-        // Formulario de editar reserva
-        document.getElementById('formEditarReserva').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (!reservaEditando) return;
-            
-            // Actualizar los datos de la reserva
-            reservaEditando.nombreHuesped = document.getElementById('editNombreHuesped').value;
-            reservaEditando.fechaEntrada = document.getElementById('editFechaEntrada').value;
-            reservaEditando.fechaSalida = document.getElementById('editFechaSalida').value;
-            reservaEditando.habitacion = parseInt(document.getElementById('editHabitacion').value);
-            reservaEditando.numPersonas = parseInt(document.getElementById('editNumPersonas').value);
-            reservaEditando.precio = parseInt(document.getElementById('editPrecio').value);
-            reservaEditando.anticipo = parseInt(document.getElementById('editAnticipo').value) || 0;
-            reservaEditando.notas = document.getElementById('editNotas').value;
-            reservaEditando.fechaModificacion = new Date().toISOString();
-            
-            // Guardar cambios
-            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
-            
-            closeModal('editarReserva');
-            generarCalendario();
-            
-            const hab = habitacionesConfig[reservaEditando.habitacion];
-            showToast(`✅ Reserva actualizada: ${reservaEditando.nombreHuesped} en ${hab.nombre}`, 'success');
-            
-            reservaEditando = null;
-        });
-
-        // Variables para edición
-        let reservaEditando = null;
-
-        // Funciones de edición de reservas
-        function abrirEditarReserva(reserva) {
-            reservaEditando = reserva;
-            
-            // Llenar el formulario con los datos actuales
-            document.getElementById('editNombreHuesped').value = reserva.nombreHuesped;
-            document.getElementById('editFechaEntrada').value = reserva.fechaEntrada;
-            document.getElementById('editFechaSalida').value = reserva.fechaSalida;
-            document.getElementById('editHabitacion').value = reserva.habitacion;
-            document.getElementById('editNumPersonas').value = reserva.numPersonas;
-            document.getElementById('editPrecio').value = reserva.precio;
-            document.getElementById('editAnticipo').value = reserva.anticipo || 0;
-            document.getElementById('editNotas').value = reserva.notas || '';
-            
-            openModal('editarReserva');
-        }
-
-        function eliminarReservaActual() {
-            if (!reservaEditando) return;
-            
-            const hab = habitacionesConfig[reservaEditando.habitacion];
-            if (confirm(`¿Estás seguro de eliminar la reserva de ${reservaEditando.nombreHuesped} en ${hab.nombre}?`)) {
-                const index = reservas.findIndex(r => r.id === reservaEditando.id);
-                if (index !== -1) {
-                    reservas.splice(index, 1);
-                    localStorage.setItem('hostalReservas', JSON.stringify(reservas));
-                    
-                    closeModal('editarReserva');
-                    generarCalendario();
-                    
-                    showToast(`✅ Reserva de ${reservaEditando.nombreHuesped} eliminada`, 'success');
-                    reservaEditando = null;
-                }
-            }
-        }
-
-        // Funciones de WhatsApp
-        function abrirMensajeWhatsApp() {
-            if (!reservaEditando) return;
-            
-            const mensaje = generarMensajeWhatsApp(reservaEditando);
-            document.getElementById('mensajeWhatsappTexto').textContent = mensaje;
-            openModal('whatsappModal');
-        }
-
-        function generarMensajeWhatsApp(reserva) {
-            // Calcular información de la reserva
-            const fechaEntrada = new Date(reserva.fechaEntrada + 'T00:00:00');
-            const fechaSalida = new Date(reserva.fechaSalida + 'T00:00:00');
-            const noches = Math.ceil((fechaSalida - fechaEntrada) / (1000 * 60 * 60 * 24));
-            const precioTotal = reserva.precio * noches;
-            
-            // Obtener información de la habitación
-            const hab = habitacionesConfig[reserva.habitacion];
-            
-            // Formatear fechas en español
-            const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const fechaEntradaStr = fechaEntrada.toLocaleDateString('es-CL', opcionesFecha);
-            const fechaSalidaStr = fechaSalida.toLocaleDateString('es-CL', opcionesFecha);
-            
-            // Calcular anticipo (si existe en los datos de la reserva)
-            const anticipo = reserva.anticipo || 0;
-            const saldoPendiente = precioTotal - anticipo;
-            
-            // Generar mensaje formateado para WhatsApp
-            let mensaje = `🏨 *CONFIRMACIÓN DE RESERVA*\n`;
-            mensaje += `*HOSTAL PLAZA LEBU*\n\n`;
-            
-            mensaje += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            
-            mensaje += `👤 *DATOS DEL HUÉSPED*\n`;
-            mensaje += `Nombre: ${reserva.nombreHuesped}\n`;
-            mensaje += `Personas: ${reserva.numPersonas}\n\n`;
-            
-            mensaje += `📅 *FECHAS DE ESTADÍA*\n`;
-            mensaje += `Check-in: ${fechaEntradaStr}\n`;
-            mensaje += `Check-out: ${fechaSalidaStr}\n`;
-            mensaje += `Noches: ${noches}\n\n`;
-            
-            mensaje += `🏠 *HABITACIÓN ASIGNADA*\n`;
-            mensaje += `${hab.emoji} ${hab.nombre}\n\n`;
-            
-            mensaje += `💰 *DETALLES DE PAGO*\n`;
-            mensaje += `Precio por noche: $${reserva.precio.toLocaleString('es-CL')}\n`;
-            mensaje += `Total estadía: $${precioTotal.toLocaleString('es-CL')}\n`;
-            
-            if (anticipo > 0) {
-                mensaje += `Anticipo pagado: $${anticipo.toLocaleString('es-CL')}\n`;
-                mensaje += `Saldo pendiente: $${saldoPendiente.toLocaleString('es-CL')}\n`;
-            } else {
-                mensaje += `Saldo pendiente: $${precioTotal.toLocaleString('es-CL')}\n`;
-            }
-            
-            mensaje += `\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            
-            mensaje += `📍 *INFORMACIÓN IMPORTANTE*\n\n`;
-            mensaje += `⏰ *Horarios:*\n`;
-            mensaje += `• Check-in: A partir de las 14:00 hrs\n`;
-            mensaje += `• Check-out: Hasta las 12:00 hrs\n\n`;
-            
-            mensaje += `🚗 *Instrucciones de llegada:*\n`;
-            mensaje += `Por favor, avísanos 20 minutos antes de tu llegada para poder recibirte adecuadamente.\n\n`;
-            
-            mensaje += `📞 *Contacto:*\n`;
-            mensaje += `Hostal Plaza Lebu\n`;
-            mensaje += `Dirección: Pérez 672, Lebu\n`;
-            mensaje += `Teléfono: +56 9 9573 9562\n`;
-            mensaje += `Email: hostalplazalebu@gmail.com\n\n`;
-            
-            if (reserva.notas && reserva.notas.trim()) {
-                mensaje += `📝 *Notas adicionales:*\n`;
-                mensaje += `${reserva.notas}\n\n`;
-            }
-            
-            mensaje += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            mensaje += `¡Esperamos recibirte pronto! 🌟\n`;
-            mensaje += `Equipo Hostal Plaza Lebu`;
-            
-            return mensaje;
-        }
-
-        function copiarMensajeWhatsApp() {
-            const mensajeTexto = document.getElementById('mensajeWhatsappTexto').textContent;
-            
-            // Usar la API moderna del portapapeles
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(mensajeTexto).then(() => {
-                    showToast('✅ Mensaje copiado al portapapeles', 'success');
-                }).catch(err => {
-                    // Fallback si falla
-                    copiarMensajeFallback(mensajeTexto);
-                });
-            } else {
-                // Método alternativo para navegadores antiguos
-                copiarMensajeFallback(mensajeTexto);
-            }
-        }
-
-        function copiarMensajeFallback(texto) {
-            const textarea = document.createElement('textarea');
-            textarea.value = texto;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                showToast('✅ Mensaje copiado al portapapeles', 'success');
-            } catch (err) {
-                showToast('❌ Error al copiar. Por favor, copia manualmente', 'error');
-            }
-            
-            document.body.removeChild(textarea);
-        }
-
-        // Funciones del listado de reservas
-        function generarListaReservas() {
-            const container = document.getElementById('listaReservas');
-            const filtroHab = document.getElementById('filtroHabitacion');
-            const buscador = document.getElementById('buscadorReservas');
-            
-            if (!container) return;
-            
-            // Filtrar reservas
-            const habitacionFiltro = filtroHab ? filtroHab.value : '';
-            const nombreFiltro = buscador ? buscador.value.toLowerCase().trim() : '';
-            let reservasFiltradas = [...reservas];
-            
-            // Filtro por habitación
-            if (habitacionFiltro) {
-                reservasFiltradas = reservasFiltradas.filter(r => r.habitacion.toString() === habitacionFiltro);
-            }
-            
-            // Filtro por nombre
-            if (nombreFiltro) {
-                reservasFiltradas = reservasFiltradas.filter(r => 
-                    r.nombreHuesped.toLowerCase().includes(nombreFiltro)
-                );
-            }
-            
-            // Aplicar ordenamiento
-            const ordenSelector = document.getElementById('ordenarReservas');
-            const orden = ordenSelector ? ordenSelector.value : 'fecha_asc';
-            
-            switch(orden) {
-                case 'fecha_asc':
-                    reservasFiltradas.sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
-                    break;
-                case 'fecha_desc':
-                    reservasFiltradas.sort((a, b) => new Date(b.fechaEntrada) - new Date(a.fechaEntrada));
-                    break;
-                case 'nombre_asc':
-                    reservasFiltradas.sort((a, b) => a.nombreHuesped.localeCompare(b.nombreHuesped));
-                    break;
-                case 'nombre_desc':
-                    reservasFiltradas.sort((a, b) => b.nombreHuesped.localeCompare(a.nombreHuesped));
-                    break;
-                case 'habitacion_asc':
-                    reservasFiltradas.sort((a, b) => a.habitacion - b.habitacion);
-                    break;
-                case 'precio_desc':
-                    reservasFiltradas.sort((a, b) => b.precio - a.precio);
-                    break;
-                default:
-                    reservasFiltradas.sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
-            }
-            
-            // Limpiar container
-            container.innerHTML = '';
-            
-            if (reservasFiltradas.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8" style="color: var(--text-secondary);">
-                        <i class="fas fa-calendar-times text-4xl mb-3"></i>
-                        <p>No hay reservas para mostrar</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Mostrar contador de resultados
-            const contadorDiv = document.createElement('div');
-            contadorDiv.className = 'mb-4 text-sm font-medium';
-            contadorDiv.style.color = 'var(--text-secondary)';
-            contadorDiv.innerHTML = `
-                <i class="fas fa-info-circle mr-1"></i>
-                Mostrando ${reservasFiltradas.length} de ${reservas.length} reservas
-            `;
-            container.appendChild(contadorDiv);
-            
-            // Generar cards de reservas
-            reservasFiltradas.forEach(reserva => {
-                const hab = habitacionesConfig[reserva.habitacion];
-                const noches = calcularNoches(reserva.fechaEntrada, reserva.fechaSalida);
-                const total = noches * reserva.precio;
-                
-                const fechaEntrada = new Date(reserva.fechaEntrada);
-                const fechaSalida = new Date(reserva.fechaSalida);
-                
-                const reservaCard = document.createElement('div');
-                reservaCard.className = `reserva-card hab-${reserva.habitacion}-border`;
-                reservaCard.onclick = () => abrirEditarReserva(reserva);
-                
-                reservaCard.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="md:col-span-2">
-                            <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">
-                                <i class="fas fa-user mr-2"></i>${reserva.nombreHuesped}
-                            </h3>
-                            <div class="flex items-center mb-2">
-                                <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: ${hab.color};"></span>
-                                <span style="color: var(--text-secondary);">${hab.nombre}</span>
-                                <span class="ml-3 text-sm bg-gray-100 px-2 py-1 rounded" style="background: var(--bg-secondary); color: var(--text-secondary);">
-                                    ${reserva.numPersonas} persona${reserva.numPersonas > 1 ? 's' : ''}
-                                </span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="text-sm mb-2">
-                                <div style="color: var(--text-secondary);">Entrada</div>
-                                <div class="font-medium" style="color: var(--text-primary);">
-                                    ${fechaEntrada.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                                </div>
-                            </div>
-                            <div class="text-sm">
-                                <div style="color: var(--text-secondary);">Salida</div>
-                                <div class="font-medium" style="color: var(--text-primary);">
-                                    ${fechaSalida.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm mb-1" style="color: var(--text-secondary);">
-                                ${noches} noche${noches > 1 ? 's' : ''} × $${reserva.precio.toLocaleString()}
-                            </div>
-                            <div class="text-xl font-bold" style="color: var(--primary-color);">
-                                $${total.toLocaleString()}
-                            </div>
-                            ${reserva.notas ? `<div class="text-xs mt-2" style="color: var(--text-secondary);"><i class="fas fa-sticky-note mr-1"></i>${reserva.notas}</div>` : ''}
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(reservaCard);
-            });
-        }
-
-        function exportarReservas() {
-            if (reservas.length === 0) {
-                showToast('No hay reservas para exportar', 'warning');
-                return;
-            }
-            
-            let csv = 'Nombre,Habitación,Fecha Entrada,Fecha Salida,Personas,Precio por Noche,Total,Notas\n';
-            
-            reservas.forEach(reserva => {
-                const hab = habitacionesConfig[reserva.habitacion];
-                const noches = calcularNoches(reserva.fechaEntrada, reserva.fechaSalida);
-                const total = noches * reserva.precio;
-                
-                csv += `"${reserva.nombreHuesped}","${hab.nombre}","${reserva.fechaEntrada}","${reserva.fechaSalida}",${reserva.numPersonas},${reserva.precio},${total},"${reserva.notas || ''}"\n`;
-            });
-            
-            // Detectar si es iOS
-            const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            const fechaHoy = new Date().toISOString().split('T')[0];
-            const nombreArchivo = `reservas_hostal_${fechaHoy}.csv`;
-            
-            if (isiOS) {
-                // Para iOS: usar Web Share API si está disponible
-                if (navigator.share) {
-                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                    const file = new File([blob], nombreArchivo, { type: 'text/csv' });
-                    
-                    navigator.share({
-                        title: 'Reservas Hostal Plaza Lebu',
-                        text: `Exportación de reservas del ${fechaHoy}`,
-                        files: [file]
-                    }).then(() => {
-                        showToast('📱 Archivo compartido. Guarda en Archivos > Descargas', 'success', 5000);
-                    }).catch(() => {
-                        // Fallback si Web Share API falla
-                        exportarTradicional(csv, nombreArchivo);
-                    });
-                } else {
-                    // Fallback para iOS sin Web Share API
-                    exportarTradicional(csv, nombreArchivo);
-                    showToast('📱 Para guardar en iPhone: Toca el archivo descargado > Guardar en Archivos', 'info', 6000);
-                }
-            } else {
-                // Para otros dispositivos (Android, PC)
-                exportarTradicional(csv, nombreArchivo);
-            }
-        }
-        
-        function exportarTradicional(csv, nombreArchivo) {
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = nombreArchivo;
-            
-            // Agregar al DOM temporalmente para iOS
-            document.body.appendChild(link);
-            link.click();
-            
-            // Limpiar después de un momento
-            setTimeout(() => {
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-            }, 100);
-            
-            showToast('Reservas exportadas exitosamente', 'success');
-        }
-
-        function importarReservas() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.csv';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const csv = e.target.result;
-                        const lines = csv.split('\n');
-                        const headers = lines[0].split(',');
-                        
-                        let importadas = 0;
-                        let errores = 0;
-                        
-                        for (let i = 1; i < lines.length; i++) {
-                            const line = lines[i].trim();
-                            if (!line) continue;
-                            
-                            try {
-                                // Parsear CSV simple (sin comillas complejas)
-                                const values = line.split(',').map(v => v.replace(/"/g, '').trim());
-                                
-                                if (values.length >= 6) {
-                                    const nuevaReserva = {
-                                        id: Date.now().toString() + '_' + i,
-                                        nombreHuesped: values[0],
-                                        fechaEntrada: values[2],
-                                        fechaSalida: values[3],
-                                        habitacion: parseInt(values[1].replace(/[^0-9]/g, '')) || 1,
-                                        numPersonas: parseInt(values[4]) || 1,
-                                        precio: parseInt(values[5]) || 45000,
-                                        notas: values[7] || '',
-                                        fechaCreacion: new Date().toISOString()
-                                    };
-                                    
-                                    // Validar datos básicos
-                                    if (nuevaReserva.nombreHuesped && nuevaReserva.fechaEntrada && nuevaReserva.fechaSalida) {
-                                        reservas.push(nuevaReserva);
-                                        importadas++;
-                                    }
-                                }
-                            } catch (error) {
-                                errores++;
-                                console.error('Error procesando línea:', line, error);
-                            }
-                        }
-                        
-                        if (importadas > 0) {
-                            localStorage.setItem('hostalReservas', JSON.stringify(reservas));
-                            generarCalendario();
-                            generarListaReservas();
-                            showToast(`✅ ${importadas} reservas importadas exitosamente`, 'success');
-                        } else {
-                            showToast('No se pudieron importar reservas. Verifique el formato del archivo.', 'error');
-                        }
-                        
-                        if (errores > 0) {
-                            showToast(`⚠️ ${errores} líneas no se pudieron procesar`, 'warning');
-                        }
-                        
-                    } catch (error) {
-                        console.error('Error importando CSV:', error);
-                        showToast('Error al leer el archivo CSV', 'error');
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        }
-
-        // Funciones del dashboard
-        function generarDashboard() {
-            actualizarEstadisticas();
-            actualizarResumenHabitaciones();
-            actualizarProximasLlegadas();
-        }
-
-        function actualizarEstadisticas() {
-            const hoy = new Date();
-            const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-            const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-            
-            // Total de reservas
-            document.getElementById('totalReservas').textContent = reservas.length;
-            
-            // Reservas activas hoy
-            const reservasHoy = reservas.filter(r => {
-                const entrada = new Date(r.fechaEntrada);
-                const salida = new Date(r.fechaSalida);
-                return hoy >= entrada && hoy < salida;
-            });
-            document.getElementById('reservasActivas').textContent = reservasHoy.length;
-            
-            // Ingresos del mes
-            const reservasMes = reservas.filter(r => {
-                const entrada = new Date(r.fechaEntrada);
-                return entrada >= inicioMes && entrada <= finMes;
-            });
-            const ingresos = reservasMes.reduce((total, r) => {
-                const noches = calcularNoches(r.fechaEntrada, r.fechaSalida);
-                return total + (noches * r.precio);
-            }, 0);
-            document.getElementById('ingresosMes').textContent = '$' + ingresos.toLocaleString();
-            
-            // Ocupación promedio (simplificada)
-            const diasMes = finMes.getDate();
-            const totalHabitaciones = 5;
-            const ocupacion = Math.round((reservasMes.length / (diasMes * totalHabitaciones)) * 100);
-            document.getElementById('ocupacionPromedio').textContent = Math.min(ocupacion, 100) + '%';
-        }
-
-        function actualizarResumenHabitaciones() {
-            const container = document.getElementById('resumenHabitaciones');
-            container.innerHTML = '';
-            
-            for (let hab = 1; hab <= 5; hab++) {
-                const habConfig = habitacionesConfig[hab];
-                const reservasHab = reservas.filter(r => r.habitacion === hab);
-                const ingresos = reservasHab.reduce((total, r) => {
-                    const noches = calcularNoches(r.fechaEntrada, r.fechaSalida);
-                    return total + (noches * r.precio);
-                }, 0);
-                
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between p-3 rounded-lg border';
-                div.style.borderColor = 'var(--border-color)';
-                div.style.background = 'var(--bg-secondary)';
-                
-                div.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="inline-block w-4 h-4 rounded-full mr-3" style="background: ${habConfig.color};"></span>
-                        <span style="color: var(--text-primary);">${habConfig.nombre}</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-semibold" style="color: var(--text-primary);">${reservasHab.length} reservas</div>
-                        <div class="text-sm" style="color: var(--text-secondary);">$${ingresos.toLocaleString()}</div>
-                    </div>
-                `;
-                
-                container.appendChild(div);
-            }
-        }
-
-        function actualizarProximasLlegadas() {
-            const container = document.getElementById('proximasLlegadas');
-            const hoy = new Date();
-            const en7dias = new Date();
-            en7dias.setDate(hoy.getDate() + 7);
-            
-            const proximasReservas = reservas.filter(r => {
-                const entrada = new Date(r.fechaEntrada);
-                return entrada >= hoy && entrada <= en7dias;
-            }).sort((a, b) => new Date(a.fechaEntrada) - new Date(b.fechaEntrada));
-            
-            container.innerHTML = '';
-            
-            if (proximasReservas.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-4" style="color: var(--text-secondary);">
-                        <i class="fas fa-calendar-check text-2xl mb-2"></i>
-                        <p>No hay llegadas programadas en los próximos 7 días</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            proximasReservas.forEach(reserva => {
-                const hab = habitacionesConfig[reserva.habitacion];
-                const fechaEntrada = new Date(reserva.fechaEntrada);
-                const esHoy = fechaEntrada.toDateString() === hoy.toDateString();
-                
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors';
-                div.style.borderColor = 'var(--border-color)';
-                div.onclick = () => abrirEditarReserva(reserva);
-                
-                if (esHoy) {
-                    div.style.borderLeft = '4px solid #10b981';
-                    div.style.background = 'rgba(16, 185, 129, 0.05)';
-                }
-                
-                div.innerHTML = `
-                    <div>
-                        <div class="font-semibold" style="color: var(--text-primary);">
-                            ${reserva.nombreHuesped}
-                            ${esHoy ? '<span class="text-green-600 text-sm ml-2">HOY</span>' : ''}
-                        </div>
-                        <div class="text-sm flex items-center" style="color: var(--text-secondary);">
-                            <span class="inline-block w-3 h-3 rounded-full mr-2" style="background: ${hab.color};"></span>
-                            ${hab.nombre} • ${reserva.numPersonas} personas
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-medium" style="color: var(--text-primary);">
-                            ${fechaEntrada.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                        </div>
-                        <div class="text-sm" style="color: var(--text-secondary);">
-                            ${calcularNoches(reserva.fechaEntrada, reserva.fechaSalida)} noches
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(div);
-            });
-        }
-
-        // Variables para gráficos
-        let graficoOcupacionChart = null;
-        let graficoIngresosChart = null;
-        let graficoReservasChart = null;
-
-        // Funciones de estadísticas
-        function generarEstadisticas() {
-            setTimeout(() => {
-                generarGraficoOcupacion();
-                generarGraficoIngresos();
-                generarGraficoReservasLinea();
-            }, 100);
-        }
-
-        function generarGraficoOcupacion() {
-            const ctx = document.getElementById('graficoOcupacion');
-            if (!ctx) return;
-
-            // Destruir gráfico anterior si existe
-            if (graficoOcupacionChart) {
-                graficoOcupacionChart.destroy();
-            }
-
-            // Calcular datos por habitación
-            const datosHabitaciones = [];
-            const colores = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
-            
-            for (let hab = 1; hab <= 5; hab++) {
-                const reservasHab = reservas.filter(r => r.habitacion === hab).length;
-                datosHabitaciones.push(reservasHab);
-            }
-
-            graficoOcupacionChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Habitación 1', 'Habitación 2', 'Habitación 3', 'Habitación 4', 'Habitación 5'],
-                    datasets: [{
-                        data: datosHabitaciones,
-                        backgroundColor: colores,
-                        borderWidth: 3,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                },
-                                usePointStyle: true
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function generarGraficoIngresos() {
-            const ctx = document.getElementById('graficoIngresos');
-            if (!ctx) return;
-
-            // Destruir gráfico anterior si existe
-            if (graficoIngresosChart) {
-                graficoIngresosChart.destroy();
-            }
-
-            // Calcular ingresos por mes (últimos 6 meses)
-            const meses = [];
-            const ingresos = [];
-            const hoy = new Date();
-
-            for (let i = 5; i >= 0; i--) {
-                const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
-                const nombreMes = fecha.toLocaleDateString('es-ES', { month: 'short' });
-                meses.push(nombreMes);
-
-                const inicioMes = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-                const finMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
-
-                const reservasMes = reservas.filter(r => {
-                    const entrada = new Date(r.fechaEntrada);
-                    return entrada >= inicioMes && entrada <= finMes;
-                });
-
-                const ingresoMes = reservasMes.reduce((total, r) => {
-                    const noches = calcularNoches(r.fechaEntrada, r.fechaSalida);
-                    return total + (noches * r.precio);
-                }, 0);
-
-                ingresos.push(ingresoMes);
-            }
-
-            graficoIngresosChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: meses,
-                    datasets: [{
-                        label: 'Ingresos ($)',
-                        data: ingresos,
-                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                        borderColor: '#3b82f6',
-                        borderWidth: 2,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function generarGraficoReservasLinea() {
-            const ctx = document.getElementById('graficoReservas');
-            if (!ctx) return;
-
-            // Destruir gráfico anterior si existe
-            if (graficoReservasChart) {
-                graficoReservasChart.destroy();
-            }
-
-            // Calcular reservas por mes (últimos 6 meses)
-            const meses = [];
-            const cantidadReservas = [];
-            const hoy = new Date();
-
-            for (let i = 5; i >= 0; i--) {
-                const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
-                const nombreMes = fecha.toLocaleDateString('es-ES', { month: 'short' });
-                meses.push(nombreMes);
-
-                const inicioMes = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-                const finMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
-
-                const reservasMes = reservas.filter(r => {
-                    const entrada = new Date(r.fechaEntrada);
-                    return entrada >= inicioMes && entrada <= finMes;
-                }).length;
-
-                cantidadReservas.push(reservasMes);
-            }
-
-            graficoReservasChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: meses,
-                    datasets: [{
-                        label: 'Reservas',
-                        data: cantidadReservas,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#10b981',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Funciones de disponibilidad
-        function generarDisponibilidad() {
-            actualizarFechaDisponibilidad();
-            actualizarEstadoHabitaciones();
-            generarCalendarioDisponibilidad();
-            actualizarResumenDisponibilidad();
-        }
-
-        function actualizarFechaDisponibilidad() {
-            const hoy = new Date();
-            const fechaElement = document.getElementById('fechaDisponibilidad');
-            if (fechaElement) {
-                fechaElement.textContent = hoy.toLocaleDateString('es-ES', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-            }
-        }
-
-        function actualizarEstadoHabitaciones() {
-            const container = document.getElementById('estadoHabitaciones');
-            if (!container) return;
-
-            container.innerHTML = '';
-            const hoy = new Date();
-
-            for (let hab = 1; hab <= 5; hab++) {
-                const habConfig = habitacionesConfig[hab];
-                
-                // Verificar si está ocupada hoy
-                const ocupadaHoy = reservas.some(r => {
-                    const entrada = new Date(r.fechaEntrada);
-                    const salida = new Date(r.fechaSalida);
-                    return r.habitacion === hab && hoy >= entrada && hoy < salida;
-                });
-
-                const div = document.createElement('div');
-                div.className = `p-4 rounded-lg border-2 text-center transition-all hover:scale-105 cursor-pointer`;
-                
-                if (ocupadaHoy) {
-                    div.style.borderColor = '#ef4444';
-                    div.style.background = 'rgba(239, 68, 68, 0.1)';
-                } else {
-                    div.style.borderColor = '#10b981';
-                    div.style.background = 'rgba(16, 185, 129, 0.1)';
-                }
-
-                div.innerHTML = `
-                    <div class="flex items-center justify-center mb-2">
-                        <span class="inline-block w-4 h-4 rounded-full mr-2" style="background: ${habConfig.color};"></span>
-                        <span class="font-semibold" style="color: var(--text-primary);">Hab ${hab}</span>
-                    </div>
-                    <div class="text-sm font-medium ${ocupadaHoy ? 'text-red-600' : 'text-green-600'}">
-                        ${ocupadaHoy ? '🔴 Ocupada' : '🟢 Libre'}
-                    </div>
-                `;
-
-                container.appendChild(div);
-            }
-        }
-
-        function generarCalendarioDisponibilidad() {
-            const container = document.getElementById('calendarioDisponibilidad');
-            if (!container) return;
-
-            const hoy = new Date();
-            let html = '<div class="min-w-full">';
-            
-            // Header de días
-            html += '<div class="grid grid-cols-15 gap-1 mb-2">';
-            html += '<div class="text-xs font-semibold p-2 text-center" style="color: var(--text-secondary);">Habitación</div>';
-            
-            for (let i = 0; i < 14; i++) {
-                const fecha = new Date(hoy);
-                fecha.setDate(hoy.getDate() + i);
-                html += `<div class="text-xs font-semibold p-2 text-center" style="color: var(--text-secondary);">
-                    ${fecha.getDate()}/${fecha.getMonth() + 1}
-                </div>`;
-            }
-            html += '</div>';
-
-            // Filas por habitación
-            for (let hab = 1; hab <= 5; hab++) {
-                const habConfig = habitacionesConfig[hab];
-                html += '<div class="grid grid-cols-15 gap-1 mb-1">';
-                html += `<div class="text-xs p-2 text-center font-medium flex items-center justify-center" style="color: var(--text-primary);">
-                    <span class="inline-block w-2 h-2 rounded-full mr-1" style="background: ${habConfig.color};"></span>
-                    H${hab}
-                </div>`;
-
-                for (let i = 0; i < 14; i++) {
-                    const fecha = new Date(hoy);
-                    fecha.setDate(hoy.getDate() + i);
-                    
-                    const ocupada = reservas.some(r => {
-                        const entrada = new Date(r.fechaEntrada);
-                        const salida = new Date(r.fechaSalida);
-                        return r.habitacion === hab && fecha >= entrada && fecha < salida;
-                    });
-
-                    const colorClass = ocupada ? 'bg-red-500' : 'bg-green-500';
-                    html += `<div class="h-6 ${colorClass} rounded"></div>`;
-                }
-                html += '</div>';
-            }
-            
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        function actualizarResumenDisponibilidad() {
-            const hoy = new Date();
-            const mañana = new Date();
-            mañana.setDate(hoy.getDate() + 1);
-
-            // Habitaciones libres hoy
-            let libresHoy = 0;
-            for (let hab = 1; hab <= 5; hab++) {
-                const ocupada = reservas.some(r => {
-                    const entrada = new Date(r.fechaEntrada);
-                    const salida = new Date(r.fechaSalida);
-                    return r.habitacion === hab && hoy >= entrada && hoy < salida;
-                });
-                if (!ocupada) libresHoy++;
-            }
-            document.getElementById('habitacionesLibres').textContent = libresHoy;
-
-            // Salidas mañana
-            const salidasMañana = reservas.filter(r => {
-                const salida = new Date(r.fechaSalida);
-                return salida.toDateString() === mañana.toDateString();
-            }).length;
-            document.getElementById('proximasSalidas').textContent = salidasMañana;
-
-            // Llegadas mañana
-            const llegadasMañana = reservas.filter(r => {
-                const entrada = new Date(r.fechaEntrada);
-                return entrada.toDateString() === mañana.toDateString();
-            }).length;
-            document.getElementById('proximasLlegadas').textContent = llegadasMañana;
-        }
-
-        // Funciones de navegación rápida del calendario
-        function actualizarNavegacionRapida() {
-            const mesSelect = document.getElementById('navegacionMes');
-            const añoSelect = document.getElementById('navegacionAño');
-            
-            if (mesSelect) {
-                mesSelect.value = fechaActual.getMonth().toString();
-            }
-            if (añoSelect) {
-                añoSelect.value = fechaActual.getFullYear().toString();
-            }
-        }
-        
-        function navegacionRapida() {
-            const mesSelect = document.getElementById('navegacionMes');
-            const añoSelect = document.getElementById('navegacionAño');
-            
-            if (mesSelect && añoSelect) {
-                const nuevoMes = parseInt(mesSelect.value);
-                const nuevoAño = parseInt(añoSelect.value);
-                
-                fechaActual = new Date(nuevoAño, nuevoMes, 1);
-                generarCalendario();
-            }
-        }
-
-        // Event listeners para filtros, buscador y navegación
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                const filtroHab = document.getElementById('filtroHabitacion');
-                const buscador = document.getElementById('buscadorReservas');
-                const ordenar = document.getElementById('ordenarReservas');
-                const mesSelect = document.getElementById('navegacionMes');
-                const añoSelect = document.getElementById('navegacionAño');
-                
-                if (filtroHab) {
-                    filtroHab.addEventListener('change', generarListaReservas);
-                }
-                
-                if (buscador) {
-                    buscador.addEventListener('input', function() {
-                        // Debounce para evitar demasiadas búsquedas
-                        clearTimeout(this.searchTimeout);
-                        this.searchTimeout = setTimeout(() => {
-                            generarListaReservas();
-                        }, 300);
-                    });
-                }
-                
-                if (ordenar) {
-                    ordenar.addEventListener('change', generarListaReservas);
-                }
-                
-                if (mesSelect) {
-                    mesSelect.addEventListener('change', navegacionRapida);
-                }
-                
-                if (añoSelect) {
-                    añoSelect.addEventListener('change', navegacionRapida);
-                }
-                
-                // Event listeners para checkboxes de habitaciones
-                document.querySelectorAll('input[name="habitaciones"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', actualizarResumenHabitacionesFormulario);
-                });
-            }, 500);
-        });
-
-        // Cerrar modales al hacer clic fuera
-        window.onclick = function(event) {
-            const modales = document.querySelectorAll('.modal');
-            modales.forEach(modal => {
-                if (event.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        }
-
-        // Inicialización
-        function inicializarApp() {
-            // Configurar tema inicial
-            document.documentElement.setAttribute('data-theme', tema);
-            const themeIcon = document.getElementById('theme-icon');
-            if (themeIcon) {
-                themeIcon.className = tema === 'light' ? 'fas fa-moon text-lg' : 'fas fa-sun text-lg';
-            }
-
-            // Configurar fechas mínimas
-            const hoy = new Date().toISOString().split('T')[0];
-            const mañana = new Date();
-            mañana.setDate(mañana.getDate() + 1);
-            const mañanaStr = mañana.toISOString().split('T')[0];
-
-            const fechaEntrada = document.getElementById('fechaEntrada');
-            const fechaSalida = document.getElementById('fechaSalida');
-            
-            if (fechaEntrada) fechaEntrada.min = hoy;
-            if (fechaSalida) fechaSalida.min = mañanaStr;
-
-            // Agregar datos de ejemplo si no hay reservas
-            if (reservas.length === 0) {
-                const ejemploReservas = [
-                    {
-                        id: 'demo_1',
-                        nombreHuesped: 'Juan Pérez',
-                        fechaEntrada: hoy,
-                        fechaSalida: mañanaStr,
-                        habitacion: 1,
-                        numPersonas: 2,
-                        precio: 45000,
-                        notas: 'Cliente frecuente',
-                        fechaCreacion: new Date().toISOString()
-                    }
-                ];
-                
-                reservas = ejemploReservas;
-                localStorage.setItem('hostalReservas', JSON.stringify(reservas));
-            }
-
-            // Cargar página inicial
-            setTimeout(() => {
-                generarCalendario();
-            }, 100);
-
-            // Mostrar mensaje de bienvenida
-            setTimeout(() => {
-                showToast('🏨 Bienvenido al Sistema del Hostal Plaza Lebu', 'info', 4000);
-            }, 1000);
-        }
-
-        // Inicializar cuando el DOM esté listo
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', inicializarApp);
-        } else {
-            inicializarApp();
-        }
-    </script>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Contraseña:</label>
+                    <input type="password" id="regPassword" required class="w-full px-4 py-3 border rounded-lg"
+                        placeholder="Mínimo 6 caracteres"
+                        style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                </div>
+                <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-xs text-yellow-800">
+                    <i class="fas fa-info-circle mr-1"></i> Al crear un usuario, el sistema registrará la nueva cuenta.
+                    Recomendamos abrir esta página en una ventana privada si no desea cerrar su sesión actual.
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-all">
+                    Crear Cuenta de Usuario
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Entry -->
+    <script type="module" src="./src/main.js"></script>
 </body>
+
 </html>
