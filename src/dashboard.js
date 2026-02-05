@@ -33,8 +33,9 @@ export function updateHeaderStats(reservas) {
     const elIngresos = document.getElementById('header-ingresos');
     const elPendientes = document.getElementById('header-pendientes');
 
+    const totalHabitaciones = Object.keys(habitacionesConfig).length;
     if (elOcupadas) elOcupadas.textContent = ocupadasHoy;
-    if (elDisponibles) elDisponibles.textContent = 5 - ocupadasHoy;
+    if (elDisponibles) elDisponibles.textContent = totalHabitaciones - ocupadasHoy;
     if (elCheckins) elCheckins.textContent = checkinsHoy;
     if (elCheckouts) elCheckouts.textContent = checkoutsHoy;
     if (elIngresos) elIngresos.textContent = `$${ingresosTotales.toLocaleString()}`;
@@ -48,8 +49,8 @@ export function updateHeaderStats(reservas) {
 
     if (dCheckins) dCheckins.textContent = checkinsHoy;
     if (dCheckouts) dCheckouts.textContent = checkoutsHoy;
-    if (dOcupacion) dOcupacion.textContent = Math.round((ocupadasHoy / 5) * 100) + '%';
-    if (dHabOcupadas) dHabOcupadas.textContent = `${ocupadasHoy} de 5 ocupadas`;
+    if (dOcupacion) dOcupacion.textContent = Math.round((ocupadasHoy / totalHabitaciones) * 100) + '%';
+    if (dHabOcupadas) dHabOcupadas.textContent = `${ocupadasHoy} de ${totalHabitaciones} ocupadas`;
 
     // Pendientes
     const checkinsPendientes = reservas.filter(r =>

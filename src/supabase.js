@@ -84,10 +84,27 @@ export const db = {
     },
 
     async sendPasswordReset(email) {
+        // Use a more robust way to get the redirect URL
+        let redirectUrl = window.location.origin;
+        if (redirectUrl === 'null' || redirectUrl.startsWith('file://')) {
+            // Fallback for local files if possible, though Supabase might reject it
+            redirectUrl = 'http://localhost:5173'; // Default Vite port
+        }
+
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin,
+            redirectTo: redirectUrl,
         });
         if (error) throw error;
+    },
+
+    async deleteAuthUser(uid) {
+        // This requires a database function 'delete_user' to be created in Supabase
+        // because the anon key cannot delete users from auth.users directly.
+        const { error } = await supabase.rpc('delete_user_by_admin', { target_user_id: uid });
+        if (error) {
+            console.warn("RPC delete_user_by_admin failed, falling back to profile deletion only.", error);
+            return this.deleteProfile(uid);
+        }
     },
 
     // Reservations

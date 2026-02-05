@@ -7,6 +7,7 @@ import { generarPDFReserva } from './pdf_generator.js';
 import { exportarReservas, importarReservas } from './data_manager.js';
 import { generarGraficoOcupacion, generarGraficoIngresos } from './charts.js';
 import { migrateLocalStorageToSupabase } from './migration.js';
+import { initializeSearch } from './search.js';
 
 // Variables globales
 window.migrateData = migrateLocalStorageToSupabase;
@@ -19,6 +20,7 @@ let userRole = 'viewer'; // Default to lowest role
 // Expose globals for HTML inline events
 window.showToast = showToast;
 window.db = db;
+window.generarPDFReserva = generarPDFReserva;
 window.toggleTheme = function () {
     tema = tema === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', tema);
@@ -52,7 +54,7 @@ async function refreshPageContent(pageId) {
     if (pageId === 'calendario') generarCalendario();
     if (pageId === 'lista') {
         const container = document.getElementById('listaReservas');
-        renderReservationsList(reservas, container);
+        initializeSearch(reservas, container);
     }
     if (pageId === 'dashboard') {
         updateHeaderStats(reservas);
