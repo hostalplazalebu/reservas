@@ -451,14 +451,9 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Personas:</label>
-                        <select id="numPersonas" class="w-full px-4 py-3 border rounded-lg"
+                        <input type="number" id="numPersonas" min="1" max="10" value="2"
+                            class="w-full px-4 py-3 border rounded-lg"
                             style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                            <option value="1">1 persona</option>
-                            <option value="2" selected>2 personas</option>
-                            <option value="3">3 personas</option>
-                            <option value="4">4 personas</option>
-                            <option value="5">5 personas</option>
-                        </select>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -556,14 +551,9 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Personas:</label>
-                        <select id="editNumPersonas" class="w-full px-4 py-3 border rounded-lg"
+                        <input type="number" id="editNumPersonas" min="1" max="10" placeholder="Cant. Personas"
+                            class="w-full px-4 py-3 border rounded-lg"
                             style="border-color: var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                            <option value="1">1 persona</option>
-                            <option value="2">2 personas</option>
-                            <option value="3">3 personas</option>
-                            <option value="4">4 personas</option>
-                            <option value="5">5 personas</option>
-                        </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">

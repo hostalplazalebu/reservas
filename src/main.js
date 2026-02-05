@@ -1,6 +1,6 @@
 import { renderReservationsList } from './reservations.js';
 import { updateHeaderStats, cargarProximos7Dias, cargarCheckinsHoy, cargarCheckoutsHoy, cargarProximasReservas } from './dashboard.js';
-import { habitacionesConfig, showToast, calcularNoches } from './utils.js';
+import { habitacionesConfig, setHabitacionesConfig, showToast, calcularNoches } from './utils.js';
 import { db } from './supabase.js';
 import { generarMensajeWhatsApp, copiarAlPortapapeles } from './notifications.js';
 import { generarPDFReserva } from './pdf_generator.js';
@@ -127,14 +127,14 @@ window.enviarRecuperacion = async function (email) {
 };
 
 window.eliminarPerfilUsuario = async function (uid, email) {
-    if (confirm(`¿Eliminar perfil de ${email}? \n\nNOTA: Esto elimina el perfil en la app, pero el usuario seguirá existiendo en Supabase Auth. Deberá borrarlo manualmente desde el Dashboard de Supabase para prohibir su entrada por completo.`)) {
+    if (confirm(`¿Está seguro de eliminar a ${email}?\n\n¡IMPORTANTE!\n1. Esto eliminará su perfil de esta lista.\n2. Para bloquear su acceso permanentemente, DEBE eliminarlo también del Dashboard de Supabase (Sección Authentication).\n\n¿Desea proceder con la eliminación del perfil?`)) {
         try {
-            await db.deleteProfile(uid);
-            showToast('✅ Perfil eliminado', 'success');
+            await db.deleteAuthUser(uid);
+            showToast('✅ Usuario eliminado del sistema', 'success');
             cargarUsuarios();
         } catch (error) {
             console.error(error);
-            showToast('❌ Error al eliminar perfil', 'error');
+            showToast('❌ Error: ' + error.message, 'error');
         }
     }
 };
@@ -318,7 +318,7 @@ if (formReserva) {
             reservas = await db.getReservations();
             closeModal('nuevaReserva');
             this.reset();
-            generarCalendario();
+            refreshPageContent(paginaActiva);
             showToast('✅ Reserva(s) guardada(s) con éxito', 'success');
         } catch (error) {
             console.error(error);
@@ -350,16 +350,16 @@ window.abrirEditarReserva = function (reserva) {
         return;
     }
 
-    editNombre.value = reserva.nombreHuesped;
-    editFechaEntrada.value = reserva.fechaEntrada;
-    editFechaSalida.value = reserva.fechaSalida;
-    editHabitacion.value = reserva.habitacion;
-    editNumPersonas.value = reserva.numPersonas;
-    editPrecio.value = reserva.precio;
+    editNombre.value = reserva.nombreHuesped || '';
+    editFechaEntrada.value = reserva.fechaEntrada || '';
+    editFechaSalida.value = reserva.fechaSalida || '';
+    editHabitacion.value = reserva.habitacion || 1;
+    editNumPersonas.value = reserva.numPersonas || reserva.num_personas || 2;
+    editPrecio.value = reserva.precio || 0;
     if (editAnticipo) editAnticipo.value = reserva.anticipo || 0;
     if (editNotas) editNotas.value = reserva.notas || '';
-    if (editEstadoPago) editEstadoPago.value = reserva.estadoPago || 'pendiente';
-    if (editMetodoPago) editMetodoPago.value = reserva.metodoPago || 'efectivo';
+    if (editEstadoPago) editEstadoPago.value = reserva.estadoPago || reserva.estado_pago || 'pendiente';
+    if (editMetodoPago) editMetodoPago.value = reserva.metodoPago || reserva.metodo_pago || 'efectivo';
 
     openModal('editarReserva');
 };
@@ -371,6 +371,7 @@ if (formEditarReserva) {
         if (!reservaEditando) return;
 
         const updatedData = {
+            ...reservaEditando,
             nombreHuesped: document.getElementById('editNombreHuesped').value,
             fechaEntrada: document.getElementById('editFechaEntrada').value,
             fechaSalida: document.getElementById('editFechaSalida').value,
@@ -390,7 +391,7 @@ if (formEditarReserva) {
             await db.updateReservation(reservaEditando.id, updatedData);
             reservas = await db.getReservations();
             closeModal('editarReserva');
-            generarCalendario();
+            refreshPageContent(paginaActiva);
             showToast('✅ Reserva actualizada', 'success');
             reservaEditando = null;
         } catch (error) {
@@ -407,7 +408,7 @@ window.eliminarReservaActual = async function () {
             await db.deleteReservation(reservaEditando.id);
             reservas = await db.getReservations();
             closeModal('editarReserva');
-            generarCalendario();
+            refreshPageContent(paginaActiva);
             showToast('✅ Reserva eliminada', 'success');
             reservaEditando = null;
         } catch (error) {
@@ -478,6 +479,54 @@ window.realizarCheckOutReserva = async function (id) {
     }
 };
 
+async function cargarHabitacionesUI() {
+    try {
+        const rooms = await db.getRooms();
+        if (rooms && rooms.length > 0) {
+            const newConfig = {};
+            rooms.forEach(r => {
+                newConfig[r.id] = {
+                    nombre: r.name,
+                    color: r.color || '#999',
+                    emoji: r.emoji || '🏠',
+                    clase: `hab-${r.id}`,
+                    precio: r.price
+                };
+            });
+            setHabitacionesConfig(newConfig);
+
+            // Update UI elements that list rooms
+            const containerCheckboxes = document.querySelector('#nuevaReserva .border.rounded-lg.p-3.space-y-2');
+            if (containerCheckboxes) {
+                containerCheckboxes.innerHTML = rooms.map(r => `
+                    <div class="flex items-center">
+                        <input type="checkbox" name="habitaciones" value="${r.id}" class="mr-2"> 
+                        ${r.name} (${r.emoji})
+                    </div>
+                `).join('');
+
+                // Re-add event listeners
+                document.querySelectorAll('input[name="habitaciones"]').forEach(cb => {
+                    cb.addEventListener('change', actualizarResumenHabitacionesForm);
+                });
+            }
+
+            const selectFiltro = document.getElementById('filtroHabitacion');
+            if (selectFiltro) {
+                selectFiltro.innerHTML = '<option value="">🏠 Todas las habitaciones</option>' +
+                    rooms.map(r => `<option value="${r.id}">${r.emoji} ${r.name}</option>`).join('');
+            }
+
+            const selectEdit = document.getElementById('editHabitacion');
+            if (selectEdit) {
+                selectEdit.innerHTML = rooms.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+            }
+        }
+    } catch (error) {
+        console.error("Error al cargar habitaciones:", error);
+    }
+}
+
 window.mostrarDisponibilidad = function () {
     const container = document.getElementById('estadoHabitaciones');
     if (!container) return;
@@ -485,7 +534,9 @@ window.mostrarDisponibilidad = function () {
 
     container.innerHTML = '';
 
-    for (let numHab = 1; numHab <= 5; numHab++) {
+    const roomsList = Object.keys(habitacionesConfig);
+
+    for (const numHab of roomsList) {
         const hab = habitacionesConfig[numHab];
 
         // Buscar reserva activa
@@ -493,9 +544,6 @@ window.mostrarDisponibilidad = function () {
             return r.habitacion == numHab && hoy >= r.fechaEntrada && hoy < r.fechaSalida;
         });
 
-        const checkoutHoy = reservas.find(r =>
-            r.habitacion == numHab && r.fechaSalida === hoy
-        );
         const checkinHoy = reservas.find(r =>
             r.habitacion == numHab && r.fechaEntrada === hoy
         );
@@ -545,6 +593,9 @@ async function inicializarApp() {
     try {
         console.log('🚀 Inicializando aplicación...');
 
+        // Dynamic Rooms
+        await cargarHabitacionesUI();
+
         // Fetch User Profile and Role
         let profile = null;
         try {
@@ -584,11 +635,28 @@ async function inicializarApp() {
         // Fetch reservations
         try {
             reservas = await db.getReservations();
-            console.log(`✅ ${reservas.length} reservas cargadas.`);
+            console.log(`✅ ${reservas.length} reservas cargadas desde Supabase.`);
+
+            // INTELIGENTE: Guardar copia de seguridad redundante
+            localStorage.setItem('respaldo_inteligente_reservas', JSON.stringify({
+                fecha: new Date().toISOString(),
+                datos: reservas
+            }));
+            console.log('💾 Copia de seguridad local actualizada.');
         } catch (e) {
             console.error("Error al cargar reservas de Supabase:", e);
-            showToast('⚠️ No se pudieron cargar datos de la nube. Revise el panel de Supabase.', 'error', 5000);
-            reservas = []; // Fallback empty
+
+            // INTELIGENTE: Fallback a respaldo local si la nube falla
+            const respaldo = localStorage.getItem('respaldo_inteligente_reservas');
+            if (respaldo) {
+                const { datos, fecha } = JSON.parse(respaldo);
+                reservas = datos;
+                const fechaLegible = new Date(fecha).toLocaleString();
+                showToast(`⚠️ Usando respaldo local (${fechaLegible}). Sin conexión a la nube.`, 'warning', 8000);
+            } else {
+                showToast('⚠️ Sin conexión y sin respaldo local disponible.', 'error', 5000);
+                reservas = [];
+            }
         }
 
         generarCalendario();
@@ -638,9 +706,26 @@ if (loginForm) {
 }
 
 // Global Auth Listener
-db.onAuthStateChange((event, session) => {
+db.onAuthStateChange(async (event, session) => {
     const loginScreen = document.getElementById('login-screen');
     const appContent = document.getElementById('app-content');
+
+    // Handle Password Recovery
+    if (event === 'PASSWORD_RECOVERY') {
+        const nuevaPassword = prompt("Introduce tu nueva contraseña:");
+        if (nuevaPassword) {
+            try {
+                const { error } = await db.supabase.auth.updateUser({ password: nuevaPassword });
+                if (error) throw error;
+                showToast('✅ Contraseña actualizada con éxito. Ya puedes iniciar sesión.', 'success');
+                await db.signOut();
+            } catch (error) {
+                console.error(error);
+                showToast('❌ Error: ' + error.message, 'error');
+            }
+        }
+        return;
+    }
 
     if (event === 'SIGNED_IN' || session) {
         loginScreen.classList.add('hidden');
@@ -670,16 +755,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
 
+            if (password.length < 6) {
+                showToast('⚠️ La contraseña debe tener al menos 6 caracteres', 'warning');
+                return;
+            }
+
             try {
                 showToast('⏳ Creando cuenta...', 'info');
-                await db.signUp(email, password);
-                showToast('✅ Usuario creado. Se le ha enviado un correo de confirmación (si está habilitado).', 'success', 5000);
-                closeModal('nuevoUsuario');
-                formNuevoUsuario.reset();
-                cargarUsuarios(); // Refresh list
+                const data = await db.signUp(email, password);
+
+                if (data && data.user) {
+                    showToast('✅ Usuario creado recordado. Si el sistema te desloguea, vuelve a entrar como administrador.', 'success', 6000);
+                    closeModal('nuevoUsuario');
+                    formNuevoUsuario.reset();
+                    // Optional: If email confirmation is ON, notify them
+                    if (data.session === null) {
+                        showToast('ℹ️ Se ha enviado un correo de confirmación. El usuario no podrá entrar hasta confirmarlo.', 'info', 8000);
+                    }
+                    cargarUsuarios(); // Refresh list
+                }
             } catch (error) {
                 console.error(error);
-                showToast('❌ Error: ' + error.message, 'error');
+                let msg = error.message;
+                if (msg.includes('already registered')) msg = 'Este correo ya está registrado';
+                showToast('❌ Error: ' + msg, 'error');
             }
         });
     }
